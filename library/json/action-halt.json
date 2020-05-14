@@ -1,0 +1,10 @@
+{
+  "lbcli": [
+    {
+      "action": "halt",
+      "vip": "",
+      "rip": "",
+      "services": "all"
+    }
+  ]
+}

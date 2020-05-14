@@ -1,0 +1,9 @@
+{"lbcli":[
+      {
+         "action":"reload-haproxy"
+      },
+      {
+         "action":"reload-heartbeat"
+      }
+   ]
+}

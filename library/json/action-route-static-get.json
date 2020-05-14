@@ -1,0 +1,9 @@
+{
+  "lbcli": [
+    {
+      "action": "route",
+      "function": "static",
+      "type": "get"
+    }
+  ]
+}

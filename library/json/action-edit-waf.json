@@ -1,0 +1,30 @@
+{
+  "lbcli": [
+    {
+      "action": "edit-waf",
+      "waf": "",
+      "in_anom_score": "",
+      "out_anom_score": "",
+      "req_data": "",
+      "resp_data": "",
+      "audit": "",
+      "proxytimeout": "",
+      "dlogin": "",
+      "dlogin_mode": "",
+      "dlogin_location": "",
+      "dlogin_static_username": "",
+      "dlogin_static_password": "",
+      "dlogin_google_clientid": "",
+      "dlogin_google_clientsecret": "",
+      "dlogin_google_redirect_uri": "",
+      "dlogin_google_passphrase": "",
+      "dlogin_google_allowed_domain": "",
+      "rule_engine": "",
+      "disable_waf": "",
+      "cacheaccel": "",
+      "cache_nocache_files": "",
+      "cache_force_cache": "",
+      "cache_object_size": ""
+    }
+  ]
+}

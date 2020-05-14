@@ -1,0 +1,7 @@
+[
+  {
+    "action": "route",
+    "function": "routes",
+    "type": "flush"
+  }
+]

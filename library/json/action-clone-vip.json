@@ -1,0 +1,11 @@
+{
+  "lbcli": [
+    {
+      "action": "clone-vip",
+      "vip": "",
+      "clone": "",
+      "ip": "",
+      "ports": ""
+    }
+  ]
+}

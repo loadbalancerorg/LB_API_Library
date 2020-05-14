@@ -1,0 +1,9 @@
+{
+  "lbcli": [
+    {
+      "action": "acl",
+      "function": "list",
+      "vip": ""
+    }
+  ]
+}

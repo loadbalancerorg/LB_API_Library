@@ -1,0 +1,10 @@
+{
+  "lbcli": [
+    {
+      "action": "termination",
+      "type": "stunnel",
+      "function": "delete",
+      "vip": ""
+    }
+  ]
+}

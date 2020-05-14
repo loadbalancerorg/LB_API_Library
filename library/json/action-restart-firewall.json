@@ -1,0 +1,7 @@
+{
+  "lbcli": [
+    {
+      "action": "restart-firewall"
+    }
+  ]
+}

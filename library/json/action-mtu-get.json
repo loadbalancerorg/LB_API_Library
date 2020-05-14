@@ -1,0 +1,8 @@
+{
+  "lbcli": [
+    {
+      "action": "mtu",
+      "function": "get"
+    }
+  ]
+}

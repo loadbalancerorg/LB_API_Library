@@ -1,0 +1,15 @@
+{
+  "lbcli": [
+    {
+      "action": "edit-rip",
+      "vip": "",
+      "rip": "",
+      "ip": "",
+      "port": "",
+      "weight": "",
+      "minconns": "",
+      "maxconns": "",
+      "encrypted": ""
+    }
+  ]
+}

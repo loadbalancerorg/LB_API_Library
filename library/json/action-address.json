@@ -1,0 +1,11 @@
+{
+  "lbcli": [
+    {
+      "action": "address",
+      "function": "",
+      "interface": "",
+      "address": "",
+      "cidr": ""
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "lbcli": [
+    {
+      "action": "hostname",
+      "function": "set",
+      "hostname": "",
+      "domain": ""
+    }
+  ]
+}

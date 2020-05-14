@@ -1,0 +1,8 @@
+{
+  "lbcli": [
+    {
+      "action": "hostname",
+      "function": "get"
+    }
+  ]
+}

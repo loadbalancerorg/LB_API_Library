@@ -1,0 +1,9 @@
+{"lbcli":[
+      {
+         "action":"ha_create",
+         "local_ip":"172.31.200.2",
+         "peer_ip":"172.31.200.3",
+         "peer_password":"loadbalancer"
+      }
+   ]
+}

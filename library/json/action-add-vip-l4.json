@@ -1,0 +1,14 @@
+{
+  "lbcli": [
+    {
+      "action": "add-vip",
+      "layer": 4,
+      "vip": "",
+      "ip": "",
+      "ports": "",
+      "forwarding": "",
+      "protocol": "",
+      "slave_ip": ""
+    }
+  ]
+}

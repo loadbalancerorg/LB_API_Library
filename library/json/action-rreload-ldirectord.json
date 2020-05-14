@@ -1,0 +1,7 @@
+{
+  "lbcli": [
+    {
+      "action": "reload-ldirectord"
+    }
+  ]
+}

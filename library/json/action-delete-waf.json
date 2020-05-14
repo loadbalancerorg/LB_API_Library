@@ -1,0 +1,9 @@
+{
+  "lbcli": [
+    {
+      "action": "delete-waf",
+      "vip": "",
+      "waf": ""
+    }
+  ]
+}

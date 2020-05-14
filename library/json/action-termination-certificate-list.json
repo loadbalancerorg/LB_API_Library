@@ -1,0 +1,9 @@
+{
+  "lbcli": [
+    {
+      "action": "termination",
+      "type": "certificate",
+      "function": "list"
+    }
+  ]
+}

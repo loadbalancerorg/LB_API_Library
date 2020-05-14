@@ -1,0 +1,9 @@
+{
+  "lbcli": [
+    {
+      "action": "lockdown",
+      "enabled": true,
+      "network": ""
+    }
+  ]
+}

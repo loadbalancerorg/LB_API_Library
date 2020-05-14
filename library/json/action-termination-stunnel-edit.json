@@ -1,0 +1,32 @@
+{
+  "lbcli": [
+    {
+      "action": "termination",
+      "type": "stunnel",
+      "function": "edit",
+      "vip": "",
+      "ip": "",
+      "port": "",
+      "backend_ip": "",
+      "backend_port": "",
+      "sslcert": "",
+      "sslmode": "",
+      "haproxy_ssl_link": "",
+      "ciphers": "",
+      "disablesslv2": "",
+      "disablesslv3": "",
+      "disabletlsv1": "",
+      "stunneldnsdelay": "",
+      "stunnelproxy": "",
+      "servercipherorder": "",
+      "emptyfragments": "",
+      "stunnelrenegotiation": "",
+      "stunneltimetoclose": "",
+      "proxy_bind": "",
+      "slave_ip": "",
+      "disabletlsv1_1": "",
+      "disabletlsv1_2": "",
+      "disabletlsv1_3": ""
+    }
+  ]
+}

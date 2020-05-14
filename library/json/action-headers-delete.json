@@ -1,0 +1,11 @@
+{
+  "lbcli": [
+    {
+      "action": "headers",
+      "function": "delete",
+      "vip": "",
+      "header_option": "",
+      "header_name": ""
+    }
+  ]
+}

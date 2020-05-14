@@ -1,0 +1,11 @@
+{
+  "lbcli": [
+    {
+      "action": "api",
+      "function": "enable",
+      "username": "",
+      "password": "",
+      "apikey": ""
+    }
+  ]
+}

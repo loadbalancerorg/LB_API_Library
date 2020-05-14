@@ -1,0 +1,14 @@
+{
+  "lbcli": [
+    {
+      "action": "acl",
+      "function": "delete",
+      "vip": "",
+      "pathtype": "",
+      "path": "",
+      "redirecttype": "",
+      "location": "",
+      "bool": ""
+    }
+  ]
+}

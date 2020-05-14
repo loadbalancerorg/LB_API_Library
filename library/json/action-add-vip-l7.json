@@ -1,0 +1,17 @@
+{
+  "lbcli": [
+    {
+      "action": "add-vip",
+      "layer": 7,
+      "vip": "",
+      "ip": "",
+      "ports": "",
+      "mode": "",
+      "fallback_ip": "",
+      "fallback_port": "",
+      "service_type": "",
+      "slave_ip": "",
+      "encrypt_all_backends": ""
+    }
+  ]
+}

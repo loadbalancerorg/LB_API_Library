@@ -1,0 +1,8 @@
+{
+  "lbcli": [
+    {
+      "action": "add-floating-ip",
+      "ip": ""
+    }
+  ]
+}

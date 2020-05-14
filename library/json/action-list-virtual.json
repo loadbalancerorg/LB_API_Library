@@ -1,0 +1,11 @@
+{
+  "lbcli": [
+    {
+      "action": "list",
+      "function": "virtual",
+      "layer": "",
+      "vip": "",
+      "rip": ""
+    }
+  ]
+}
