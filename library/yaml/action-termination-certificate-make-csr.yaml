@@ -1,0 +1,15 @@
+lbcli:  
+-  action: termination
+   type: certificate
+   function: csr
+   csrname:
+   city:
+   province:
+   country:
+   organisation:
+   unit:
+   domain:
+   email:
+   csrsize:
+   signalgorithm:
+   days:

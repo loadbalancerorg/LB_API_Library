@@ -1,0 +1,315 @@
+   
+lbcli:  
+-  action: reload-apache      
+   
+lbcli:  
+-  action: reload-ldirectord          
+   
+lbcli:  
+-  action: reload-haproxy                
+   
+lbcli:  
+-  action: reload-waf
+   
+lbcli:  
+-  action: reload-syslog          
+   
+lbcli:  
+-  action: reload-stunnel          
+   
+lbcli:  
+-  action: reload-heartbeat
+   
+lbcli:  
+-  action: haproxy-clear-stick
+   
+lbcli:  
+-  action: termination
+   type: certificate
+   function: list
+   
+lbcli:  
+-  action: termination
+   type: certificate
+   function: csr
+   csrname:
+   city:
+   province:
+   country:
+   organisation:
+   unit:
+   domain:
+   email:
+   csrsize:
+   signalgorithm:
+   days:
+
+   
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: add
+   vip:
+   ip:
+   port:
+   backend_ip:
+   backend_port:
+   sslcert:
+   slave_ip:
+   disabletlsv1_1:
+   disabletlsv1_2:
+   disabletlsv1_3:
+   sslmode:
+   haproxy_ssl_link:
+   
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: edit
+   vip:
+   ip:
+   port:
+   backend_ip:
+   backend_port:
+   sslcert:
+   sslmode:
+   haproxy_ssl_link:
+   ciphers:
+   disablesslv2:
+   disablesslv3:
+   disabletlsv1:
+   stunneldnsdelay:
+   stunnelproxy:
+   servercipherorder:
+   emptyfragments:
+   stunnelrenegotiation:
+   stunneltimetoclose:
+   proxy_bind:
+   slave_ip:
+   disabletlsv1_1:
+   disabletlsv1_2:
+   disabletlsv1_3:
+   sslcert:
+   
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: delete
+   vip:
+   
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: edit
+   vip:
+   sni: add
+   sni_name:
+   sni_rule:
+   sni_cert:
+   sni_backend_proxyprotocol:
+   sni_backend_service:
+   sni_backend_ip:
+   sni_backend_port:
+   
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: edit
+   vip:
+   sni: edit
+   sni_name:
+   sni_rule:
+   sni_cert:
+   sni_backend_proxyprotocol:
+   sni_backend_service:
+   sni_backend_ip:
+   sni_backend_port:
+   
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: edit
+   vip:
+   sni: delete
+   sni_name:
+   sni_rule:
+   
+lbcli:  
+-  action: acl
+   function: list
+   vip:
+   
+lbcli:  
+-  action: acl
+   function: add
+   vip:
+   pathtype:                      
+   path:
+   redirecttype:
+   location:
+   bool:
+   
+lbcli:  
+-  action: acl
+   function: delete
+   vip:
+   pathtype:
+   path:
+   redirecttype:
+   location:
+   bool:
+   
+lbcli:  
+-  action: headers
+   function: add
+   vip:
+   header_type:
+   header_option:
+   header_name:
+   header_value:
+   
+lbcli:  
+-  action: headers
+   function: delete
+   vip:
+   header_option:      
+   header_name:
+
+lbcli:  
+-  action: headers
+   function: list
+   vip:
+   
+lbcli:  
+-  action: lockdown
+   enabled: on
+   network:
+   
+lbcli:  
+-  action: list
+   function: floatingip
+   
+lbcli:  
+-  action: list
+   function: dumpconfig
+   
+lbcli:  
+-  action: list
+   function: advanced
+   layer:
+   
+lbcli:  
+-  action: list
+   function: virtual
+   layer:
+   vip:  
+   rip:
+
+lbcli:  
+-  action: ha_create
+   local_ip:
+   peer_ip:
+   peer_password:
+
+lbcli:  
+-  action: hostname
+   function: get
+   
+lbcli:  
+-  action: hostname
+   function: set
+   hostname:
+   domain:
+
+lbcli:  
+-  action: dns
+   function: get    
+   
+lbcli:  
+-  action: dns
+   function: set
+   dns0:
+   dns1:
+   dns2:
+
+lbcli:  
+-  action: mtu
+   function: get
+   
+lbcli:  
+-  action: mtu
+   function: set
+   interface:
+   mtu:
+   
+lbcli:  
+-  action: route
+   function: default
+   type: get
+   
+lbcli:  
+-  action: route
+   function: default
+   type: set
+   gateway:
+   interface:
+   
+lbcli:  
+-  action: route
+   function: static
+   type: get    
+   
+lbcli:  
+-  action: route
+   function: static
+   type: add
+   network:
+   gateway:
+
+lbcli:  
+-  action: route
+   function: static
+   type: del
+   network:
+   gateway:
+
+lbcli:  
+-  action: route
+   function: routes
+   type: flush
+
+lbcli:  
+-  action: address
+   function:
+   interface:
+   address:
+   cidr:
+
+lbcli:  
+-  action: pbr
+   function:
+   ip:
+   gateway:
+
+lbcli:  
+-  action: api
+   function: enable
+   username:
+   password:
+   apikey:
+
+lbcli:  
+-  action: api
+   function: disable  
+
+lbcli:  
+-  action: api
+   function: get
+
+lbcli:  
+-  action: power
+   function: shutdown
+
+lbcli:  
+-  action: power
+   function: restart

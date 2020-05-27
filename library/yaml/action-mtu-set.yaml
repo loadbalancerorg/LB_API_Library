@@ -1,0 +1,5 @@
+lbcli:  
+-  action: mtu
+   function: set
+   interface:
+   mtu:

@@ -1,0 +1,16 @@
+lbcli:  
+-  action: termination
+   type: stunnel
+   function: add
+   vip:
+   ip:
+   port:
+   backend_ip:
+   backend_port:
+   sslcert:
+   slave_ip:
+   disabletlsv1_1:
+   disabletlsv1_2:
+   disabletlsv1_3:
+   sslmode:
+   haproxy_ssl_link:

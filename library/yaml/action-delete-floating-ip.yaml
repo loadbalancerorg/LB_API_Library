@@ -1,0 +1,3 @@
+lbcli:  
+-  action: delete-floating-ip
+   ip:

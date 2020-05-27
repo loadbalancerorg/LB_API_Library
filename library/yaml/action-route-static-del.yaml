@@ -1,0 +1,6 @@
+lbcli:  
+-  action: route
+   function: static
+   type: del
+   network:
+   gateway:

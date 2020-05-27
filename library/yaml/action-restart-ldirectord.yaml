@@ -1,0 +1,2 @@
+lbcli:  
+-  action: restart-ldirectord

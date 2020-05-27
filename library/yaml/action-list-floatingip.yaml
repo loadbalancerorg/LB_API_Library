@@ -1,0 +1,3 @@
+lbcli:  
+-  action: list
+   function: floatingip

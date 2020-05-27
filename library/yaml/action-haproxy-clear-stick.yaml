@@ -1,0 +1,3 @@
+lbcli:  
+-  action: haproxy-clear-stick
+   

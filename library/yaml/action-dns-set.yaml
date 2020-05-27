@@ -1,0 +1,6 @@
+lbcli:  
+-  action: dns
+   function: set
+   dns0:
+   dns1:
+   dns2:

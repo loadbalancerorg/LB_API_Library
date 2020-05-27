@@ -1,0 +1,9 @@
+lbcli:  
+-  action: acl
+   function: add
+   vip:
+   pathtype:                      
+   path:
+   redirecttype:
+   location:
+   bool:

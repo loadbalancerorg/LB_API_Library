@@ -1,0 +1,3 @@
+lbcli:  
+-  action: dns
+   function: get    

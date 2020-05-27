@@ -1,0 +1,5 @@
+lbcli:  
+-  action: drain
+   vip:
+   rip:
+   services: all
