@@ -2,7 +2,7 @@
   "lbcli": [
     {
       "action": "online",
-      "ip": "",
+      "vip": "",
       "rip": "",
       "services": "all"
     }
