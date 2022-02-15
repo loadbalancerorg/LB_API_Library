@@ -1,5 +1,5 @@
 
-[1;37mLBCLI Usage: Help options[0m
+LBCLI Usage: Help options
 
 
 
