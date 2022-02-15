@@ -1,4 +1,6 @@
-﻿LBCLI Usage: Help options
+
+[1;37mLBCLI Usage: Help options[0m
+
 
 
     Overview Actions Usage Examples:
@@ -40,7 +42,6 @@ Add Layer 7 VIP:
           --slave_ip (1.2.3.4) \
           --encrypt_all_backends (on:off) 
 
-
 Delete VIP:             
     lbcli --action delete-vip --vip (VIP Name)
 
@@ -54,7 +55,7 @@ Edit VIP:
           --ip               (IP Address of the VIP)
           --ports            (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
           --protocol         (tcp:udp:ops:fwm) # We do not support manual firewall marks where IP = FWM Number as you need to manually add the firewall rules
-          --forwarding       (gate:masq:ipip) Gate = L4 DR masq=L4 NAT ipip=TUN Mode
+          --forwarding       (gate:masq:ipip:snat) Gate = L4 DR, masq=L4 NAT, ipip=TUN Mode, snat=SNAT Mode
           --granularity      (255.255.255.255) This is the subnet or single ip range for persistence
           --fallback_ip      (127.0.0.1) This is the fallback server IP Address, It may be an external IP Address
           --fallback_port    (9081) This is the fallback server port, it may be the port of an external web server.
@@ -150,7 +151,8 @@ Edit VIP:
           --http_reuse_connection  (on:off) It is possible to reuse idle connections to serve requests from the same session which can be beneficial in terms of performance. 
                                    It is important to note that the first request of a session is always sent over its own connection, and only subsequent requests may be dispatched 
                                    over other existing connections.
-          --tproxy                 (on:off) Turn tproxy on and off on a VIP leve. 
+          --tproxy                 (on:off) Turn tproxy on and off on the VIP level. 
+          --send_rip_name_as_host  (on:off) Use the real server name as hostname to send to the backend 
 
     lbcli --action clone-vip --vip (VIP to Clone) --clone (New Cloned VIP)  --ip (new IP Address) |or| --ports (new ports)
 
@@ -182,7 +184,6 @@ Add Layer 7 RIP:
 
 Delete RIP:             
     lbcli --action delete-rip --vip (VIP Name) --rip (RIP Name)
-
 
 Edit RIP:               
     lbcli --action edit-rip --vip (VIP Name) --rip (RIP Name) \
@@ -228,7 +229,6 @@ Delete WAF:
     lbcli --action delete-waf --vip (VIP Name) --waf (WAF Name)
 
 
-
 Floating IP Action Usage:
 
 Add Floating IP:       
@@ -245,7 +245,7 @@ Fix Floating IP:
     First ip ad del x.x.x.x/cidr dev ethx to remove all IP's on the wrong interface
     then run lbcli --action fix-floating-ip --ip ip.add.re.ss
 
- 
+  
 Services Actions Usage: 
     lbcli --action restart-ldirectord 
     lbcli --action restart-haproxy         
@@ -267,8 +267,11 @@ Services Actions Usage:
     lbcli --action reload-syslog           
     lbcli --action reload-stunnel          
     lbcli --action reload-heartbeat 
-    lbcli --action haproxy-clear-stick
+    lbcli --action reload-gslb
+    lbcli --action status-gslb
 
+
+    lbcli --action haproxy-clear-stick
 
 SSL Termination
 
@@ -292,31 +295,35 @@ Create CSR:
 Upload SSL PEM/PFX:  Please refer to the blog below
     http://www.loadbalancer.org/blog/how-do-i-automate-load-balancer-deployments/
    
+
 Add Termination:        
     lbcli --action termination --type stunnel --function add  --vip (VIPNAME) \
-          --ip (IP ADDRESS) 
+          --ip (IP ADDRESS) \
           --port (PORT) \
           --backend_ip (BACKEND IP) \
+          --slave_ip (Azure Only) \
           --backend_port (BACKEND PORT) \
           --sslcert (SSLCERTNAME) \
-          --slave_ip (Azure Only) \
           --disabletlsv1_1  (on:off) \
           --disabletlsv1_2 (on:off) \
           --disabletlsv1_3 (on:off) \
           --sslmode (high|fips|compatable|custom) \
-          --haproxy_ssl_link (This is a combination of VIP_Name^VIP^PORT or custom)
-
+          --associated_to (Layer7 VIP to associate to, likely the same as --proxy_bind)
+          # --haproxy_ssl_link (This is a combination of VIP_Name^VIP^PORT or custom) # DEPRECIATED
+           
 
 Edit Termintaion:       
     lbcli --action termination --type stunnel --function edit  --vip (VIPNAME) \
           --ip (IP ADDRESS) \
           --port (PORT) \
           --backend_ip (BACKEND IP) \
+          --slave_backend_ip \ #(BACKEND IP ON THE SLAVE IN AZURE)
           --backend_port (BACKEND PORT) \
           --sslcert (SSLCERTNAME) \
           --sslmode (high|fips|compatable|custom) \
-          --haproxy_ssl_link (This is a combination of VIP_Name^VIP^PORT or custom) \
-          --ciphers \# This and below syntax are optional. 
+          --associated_to (Layer7 VIP to associate to, likely the same as --proxy_bind) \
+          #  --haproxy_ssl_link #(This is a combination of VIP_Name^VIP^PORT or custom) DEPRECIATED \
+          --ciphers \ # This and below syntax are optional. 
           --disablesslv2 (on:off) \
           --disablesslv3 (on:off) \
           --disabletlsv1 (on:off) \
@@ -325,9 +332,10 @@ Edit Termintaion:
           --servercipherorder (on:off) \
           --emptyfragments  (on:off) \
           --stunnelrenegotiation (on:off) \
-          --stunneltimetoclose  0 \
-          --proxy_bind \
-          --slave_ip \
+          --stunneltimetoclose 0 \
+          --proxy_bind L7VIPLabel\
+          --slave_ip \     (SLAVE IP IN AZURE)
+          --slave_source \ (SLAVE IP IN AZURE)
           --disabletlsv1_1 (on:off)\
           --disabletlsv1_2 (on:off)\
           --disabletlsv1_3 (on:off) \
@@ -337,8 +345,6 @@ Delete Termintaion:
     lbcli --action termination --type stunnel --function delete --vip (VIPNAME)
 
   
-
-
 SSL SNI Features
 
 ADD SNI Rules:          
@@ -347,8 +353,9 @@ ADD SNI Rules:
           --sni_rule (example.com) \
           --sni_cert (SSLCERTNAME) \
           --sni_backend_proxyprotocol (on:off) \
-          --sni_backend_service (L7VPIName) \
+          --sni_backend_service (L7VPIName) \ if you define sni_backend_ip and sni_slave_backend_ip in you must say sni_backend_service is custom
           --sni_backend_ip (SNI_BACKEND_IP) \
+          --sni_slave_backend_ip (SLAVE_SNI_BACKEND_IP) \
           --sni_backend_port (BACKEND_PORT)
 
 
@@ -358,7 +365,8 @@ EDIT SNI Rules:
           --sni_rule (example.com) \
           --sni_cert (SSLCERTNAME) \
           --sni_backend_proxyprotocol (on:off) \
-          --sni_backend_service (L7VPIName)
+          --sni_backend_service (L7VPIName) \
+          --sni_slave_backend_ip (SLAVE_SNI_BACKEND_IP) \
           # or use below to replace sni_backend_service name and define ip and port
           --sni_backend_ip (SNI_BACKEND_IP) --sni_backend_port (BACKEND_PORT)
 
@@ -388,7 +396,6 @@ DELETE ACL Rules:
           --redirecttype (url_loc|url_pre|backend|use_server) \
           --location (URL|BACKEND) \
           --bool (equal|notequal)
-
 
 Layer7 Header Features
 
@@ -429,7 +436,6 @@ List advanced settings
 List VIP for Layer4/7   
     lbcli --action list --function virtual --layer 4:7 \
           --vip vipname --rip ripname
-
 
 HA options
 
@@ -488,7 +494,6 @@ Get and set static routes
 
     lbcli --action route --function routes --type flush 
 
-
 Flushing routes will remove all static routes.
 
 Add and remove IP Addresses      
@@ -525,6 +530,49 @@ Policy Based Routing issues.
 
 
 
+GSLB: Added v8.5.0  
+
+    lbcli --action gslb --section (globalnames|members|pools|topologies) --function (add|edit|delete|list)
+
+    (globalnames)  --name <example> --hostname  <fully qualified domain name> --ttl <3600>
+
+    (members) --name --ip <dns IP to publish> --monitor_ip <internal ip to monitor> --weight <0-10> --add_member name --add_member name
+    // only valid members are accepted and not more then one members which is the same per pool entry. two pools can share members
+    // members may share the backend but this will get confusing so please and keep your members low, unless you need another
+    // healthcheck then redefine the same IP for a Name in an Endpoint but be aware health checks may take their toll on the network.
+    // keep health check responses minimal  
+
+    (pools)  --name <poolname> --monitor <http|tcp|forced|external> --monitor_interval <5> --monitor_timeout <5000> \
+             --monitor_retries <3> --monitor_use_ssl <yes:no> --monitor_status <up:down> --monitor_hostname <fully qualified domain name / SNI Hostname> \
+             --monitor_port <80> --monitor_expected_codes <200,201 important - no spaces>  --monitor_send_string </example.php?status=up> \
+             --lb_method <wrr|twrr|fogroup> --fallback <any|refuse> --max_addresses_returned <1> --add_globalname <each globalname> \
+             --add_globalname <another globalname> --delete_globalname <delete globalname>  \
+             --add_member <first members> --delete_member <delete members> 
+
+            --monitor http --monitor_use_ssl <yes:no or true:false> --monitor_hostname gslb.example.com \
+                           --monitor_url_path / --monitor_port 80 --monitor_expected_codes 200,201,301 (only 3 codes expected)
+
+            --monitor tcp --monitor_port 80 --monitor_send_string check --monitor_match_response ?
+
+            --monitor forced --monitor_status <up:down>
+
+            --monitor external --monitor_script script.sh --monitor_parameters arg --monitor_result
+
+            --monitor external_dynamic_weight --monitor_port ? --monitor_parameters ?? 
+
+             To remove globalname you should use --delete_globalname and to remove members use --delete_member
+            
+             You should only use the --delete_globalname or --delete_member when editing your pools
+
+
+    (topologies) --name <Your AZ, DC, GEOLocaton> --add_ips <IP/CIDR> --add_ips <IP/CIDR> --add_ips <IP/CIDR> \
+                 --add_ips <Add as many IP CIDR ranges as needed> --delete_ips <IP/CIDR to remove>
+
+	(reports)
+
+	lbcli --action gslb --section reports --function get --report get_ppdns_state | get_generic_state
+
+
 
 Configure LBAPI from LBCLI
     lbcli --action api --function (enable:disable|get) \
@@ -556,5 +604,3 @@ lbcli --help (action lbcli help about)
 *   Informational 
 **  Not tested or complete
 *** Warning`
-
-
