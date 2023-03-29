@@ -1,4 +1,5 @@
-[?s[?19997h[1;37mLBCLI Usage: Help options[0m
+[?s[?19997h
+[1;37mLBCLI Usage: Help options[0m
 
 
 
@@ -52,7 +53,7 @@ Edit VIP:
 
     Layer4:    
           --ip               (IP Address of the VIP)
-          --ports            (Ports can be 80 80,81 or 800-900 or 80,90-100,3443 as a mix of port,separated,values and also port-ranges values)
+          --ports            (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
           --protocol         (tcp:udp:ops:fwm) # We do not support manual firewall marks where IP = FWM Number as you need to manually add the firewall rules
           --forwarding       (gate:masq:ipip:snat) Gate = L4 DR, masq=L4 NAT, ipip=TUN Mode, snat=SNAT Mode
           --granularity      (255.255.255.255) This is the subnet or single ip range for persistence
@@ -82,7 +83,7 @@ Edit VIP:
  
     Layer7:  
           --ip                     (IP Address of VIP)
-          --ports                  (Ports can be 80 80,81 or 800-900 or 80,90-100,3443 as a mix of port,separated,values and also port-ranges values)
+          --ports                  (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
           --mode                   (http:tcp) Mode of the Layer7 VIP it is either http or tcp, tcp is an alias of other_tcp and either can be specified
           --persistence            (http:appsession:sslsesid:rdp-session:rdp-cookie:ip:http_ip:xff:none:fallback_persist) 
                                    Note some persistent modes are only available in tcp mode: sslsesid, appsession, rdp-session, ip
@@ -110,7 +111,7 @@ Edit VIP:
           --feedback_method        (agent:none) The feedback method is either the feedback agent or none. This is available in mode http or tcp
           --fallback_persist       (on:off) Is the fallback server persistent on or off
           --feedback_port          (3333) Port used for the feedback agent by befault is 3333 only when method=agent
-          --check_type             (negotiate_http:negotiate_http_head:negotiate_http_options:negotiate_https:negotiate_https_head:negotiate_https_options:connect:external:mysql:none) 
+          --check_type             (negotiate_http:negotiate_http_head:negotiate_https:negotiate_https_head:connect:external:mysql:none) 
                                    Type of health check to use negotiate_https or negotiate_httpd_head are only available when backend is encrypted
           --external_check_script  (scriptname.sh) This is the filename of external check scripts 
                                     in /var/lib/loadbalancer.org/check/ available when check_type=external
