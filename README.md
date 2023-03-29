@@ -1,15 +1,12 @@
-Loadbalancer.org (c) 2020 API Interface example library
-Created by Andrew Smalley
+# LB_API_Library
 
-Please refer to the blog below for how to use this code example
+This repository contains examples of:
 
-Just google "lbcli api" to learn how to use the files here.
-
-I will be adding more over the weeks and if you fork or branch this please
-provide feedback. 
+* code used to communicate with the API interface
+* JSON payloads to use with the API
 
 
-https://www.loadbalancer.org/blog/how-to-automate-your-loadbalancer-part-2/
+Some more detail can be found in the blog linked below.
 
 https://www.loadbalancer.org/blog/how-do-i-automate-load-balancer-deployments/
 
