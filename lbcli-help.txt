@@ -1,606 +1,2026 @@
+[?s[?19997h[1;37mlbcli add-acl - Add an ACL rule[0m
 
-LBCLI Usage: Help options
+[1;37mAlternate invocations:[0m
 
+    lbcli --action acl --function add
 
+[1;37mRequired Arguments:[0m
 
-    Overview Actions Usage Examples:
+    --vip               expects an argument of type existing-l7-vip
+    --allow-duplicates  expects an argument of type bool defaults to off
+    --bool              argument should be one of equal or notEqual defaults
+                        to equal
+    --denystatus        argument should be one of 200, 400, 403, 405, 408,
+                        425, 429, 500, 502, 503 or 504 defaults to 403
+    --freetype          expects an argument of type string defaults to 
+    --headername        expects an argument of type string defaults to 
+    --location          expects an argument of type string defaults to 
+    --path              expects an argument of type string defaults to /
+    --pathtype          argument should be one of path_beg, path_end,
+                        path_reg, hdr_host, hdr_beg, query, src_blk, header,
+                        path, sni, ssl_sni, dst_port, flag or freetype
+    --redirecttype      argument should be one of url_loc, url_pre, backend,
+                        drop, none, use_server or flag
 
-Drain RIP:              
-    lbcli --action drain --vip (VIP Name) --rip (RIP Name) --services all 
-Halt RIP:               
-    lbcli --action halt --vip (VIP Name) --rip (RIP Name) --services all 
-Online RIP:             
-    lbcli --action online --vip (VIP Name) --rip (RIP Name) --services all
+    Adds an ACL rule to the specified layer 7 virtual service.  If
+    allow-duplicates is on then the new ACL will always be appended even if
+    there is an existing, matching ACL defined already.
 
-    --services all is optional to do the same --action over all VIP's.
+[1;37mlbcli add-csr - Create a Certificate Signing Request[0m
 
-    This will only work for the layer the defined VIP is in, it will not online 
-    halt or drain RIP's from another layer.
+[1;37mAlternate invocations:[0m
 
-    IE, the first VIP is a Layer7 VIP then all the real servers in Layer7 with 
-    the same --rip label will have the same action applied. 
-    
-    
-VIP Actions Usage Examples:
+    lbcli --action termination --function csr --type certificate
 
-Add Layer 4 VIP:        
-    lbcli --action add-vip --layer 4 --vip (VIP Name) \
-          --ip (VIP IP Address) \
-          --ports (ports) \
-          --forwarding (gate|masq|ipip|snat) \
-          --protocol (tcp|udp|tcpudp|ops|fwm) \
-          --slave_ip (1.2.3.4) # Slave IP is for Azure only
+[1;37mRequired Arguments:[0m
 
-Add Layer 7 VIP:        
-    lbcli --action add-vip --layer 7 --vip (VIP Name) \
-          --ip (VIP IP Address) \
-          --ports (ports) \
-          --mode (http|tcp) \
-          --fallback_ip (IP Address) \
-          --fallback_port (port) \
-          --service_type (waf_frontend) \
-          --slave_ip (1.2.3.4) \
-          --encrypt_all_backends (on:off) 
+    --country        expects an argument of type string
+    --province       expects an argument of type string
+    --city           expects an argument of type string
+    --organisation   expects an argument of type string
+    --unit           expects an argument of type string
+    --domain         expects an argument of type string
+    --email          expects an argument of type string
+    --csrsize        argument should be one of 2048 or 4096 defaults to 4096
+    --signalgorithm  argument should be one of sha256 or sha256 defaults to
+                     sha256
+    --csrname        expects an argument of type string
 
-Delete VIP:             
-    lbcli --action delete-vip --vip (VIP Name)
+[1;37mOptional Arguments:[0m
 
-    Warning : When using the edit VIP be aware you can break your configuration. 
-    Take care to use the right combination of options. All possible options are shown for Layer4 and Layer7
+    --yes-i-am-sure  expects an argument of type bool
 
-Edit VIP:               
-    lbcli --action edit-vip --vip (VIP_NAME_TO_EDIT)
+    Create a Certificate Signing Request.  When --yes-i-am-sure on is
+    specified this command will overwrite existing certificates.
 
-    Layer4:    
-          --ip               (IP Address of the VIP)
-          --ports            (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
-          --protocol         (tcp:udp:ops:fwm) # We do not support manual firewall marks where IP = FWM Number as you need to manually add the firewall rules
-          --forwarding       (gate:masq:ipip:snat) Gate = L4 DR, masq=L4 NAT, ipip=TUN Mode, snat=SNAT Mode
-          --granularity      (255.255.255.255) This is the subnet or single ip range for persistence
-          --fallback_ip      (127.0.0.1) This is the fallback server IP Address, It may be an external IP Address
-          --fallback_port    (9081) This is the fallback server port, it may be the port of an external web server.
-          --fallback_local   (on:off) MASQ Fallback. Allows fallback server port to be different to that of the real server.
-          --persistent       (on:off) Are we a persistent Layer4 VIP , this is simply on or off
-          --persist_time     (300) The persistent time in seconds by default is 300
-          --scheduler        (wlc:wrr:dh) wlc=Weighted Least Connection, wrr=Weighted Round Robin, dh=Destination Hash
-          --feedback         (agent:http:none) agent=Feedback Agent, http=HTTP, none=No Feedback
-          --email            (recpt@email.com) Your email address to receive email alerts
-          --email_from       (sender@email.com) Sending email address of email alerts
-          --check_service    (http:https:http_proxy:imap:imaps:pop:pops:ldap:smtp:nntp:dns:mysql:sip:simpletcp:radius:none)
-                             If check type = Negotiate then Layer4 knows about various service
-          --check_vhost      (host header) When using a Negotiate check we can enable a host header to check a known site status used for HTTP,HTTPS
-          --check_database   (db) Database to check if check_service=mysql
-          --check_login      (username) used when check_service is MySQL,FTP,IMAP,IMAPS,POP,POPS,LDAP,SIP
-          --check_password   (password) This is the password used with the check_login when required, FTP,IMAP,IMAPS,POP,POPS,LDAP,MYSQL,SIP
-          --check_type       (negotiate|connect|ping|external|off|on|5|10) This is the check type, Negotiate, Connect to port, External script,
-                             no checks, always off, No checks, always on, 5 Connects, 1 Negotiate, 10 Connects, 1 Negotiate
-          --check_port       (80) Port to check when using Negotiate check ,
-          --check_request    (check.txt) used for check_service= http,https,
-          --check_response   (OK) Response expected to the check_request
-          --check_secret     (secret) This is used onmly if check_service = RADIUS
-          --check_command    (external_script.sh) This is used when check_type=external
-          --autoscale_group  (YOUR AUTO SCALE GROUP NAME)  if in AWS the name of the auto scale group you have defined.
- 
-    Layer7:  
-          --ip                     (IP Address of VIP)
-          --ports                  (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
-          --mode                   (http:tcp) Mode of the Layer7 VIP it is either http or tcp, tcp is an alias of other_tcp and either can be specified
-          --persistence            (http:appsession:sslsesid:rdp-session:rdp-cookie:ip:http_ip:xff:none:fallback_persist) 
-                                   Note some persistent modes are only available in tcp mode: sslsesid, appsession, rdp-session, ip
-                                   available in http mode: http, appsession, rdp-cookie, ip , http_ip, xff
+[1;37mlbcli add-floating-ip - Add a floating IP address[0m
 
-                                   When using '--persistence fallback_persist' you MUST set --fallback_ip and --fallback_port as without these it will fail. 
+[1;37mRequired Arguments:[0m
 
-          --cookiename             (SERVERID)  only available when persistence is http,http_ip
-          --fallback_ip            (127.0.0.1) Fallback Server IP Address, this is either the internal NGINX fallback or external or VIP of fallback server
-          --fallback_port          (9081)      Fallback Port, 9081 by default of that of the external fallback server ports
-          --persist_time           (30) Persistence timeout available when persistence=appsession,sslsesid,rdp-cookie,ip,http_ip,xff
-          --persist_table_size     (10240) Persistence table size available when persistence=appsession,sslsesid,rdp-cookie,ip,http_ip,xff
-          --maxconn                (40000) max conns allowed to the VIP
-          --scheduler              (roundrobin:leastconn) Weighted Round Robin or Weighted Least Connections
-          --check_port             (Port of Service) Check port is available when check is negotiate_http,negotiate_https,connect,mysql
-          --check_request          (check.txt) name of file to request
-          --check_receive          (OK) response expected from check request
-          --check_host             (VHOST) Check host header for checking a virtual host with host header
-          --check_username         (mysql) Healthcheck username, only available with check type=mysql
-          --appsession_cookie      (JSESSIONID:PHPSESSIONID:ETC) The application session ID provided by your real server.
-          --forward_for            (on:off) Insert X-Forward-For only available in http mode.
-          --http_pipeline          (http_keep_alive|http_close|http_server_close|http_force_close) This is only available in mode=http
-          --http_pretend_keepalive (on:off) Work around broken connection: close  This is only available in mode=http
-          --stunneltproxy          (on:off) Only select on if behind an stunnel ssl termination and where stunnel proxy is also enabled on the SSL Termination
-          --feedback_method        (agent:none) The feedback method is either the feedback agent or none. This is available in mode http or tcp
-          --fallback_persist       (on:off) Is the fallback server persistent on or off
-          --feedback_port          (3333) Port used for the feedback agent by befault is 3333 only when method=agent
-          --check_type             (negotiate_http:negotiate_http_head:negotiate_https:negotiate_https_head:connect:external:mysql:none) 
-                                   Type of health check to use negotiate_https or negotiate_httpd_head are only available when backend is encrypted
-          --external_check_script  (scriptname.sh) This is the filename of external check scripts 
-                                    in /var/lib/loadbalancer.org/check/ available when check_type=external
-          --tcp_keep_alive 
-          --force_to_https         (on:off) Force connection to https, if used then no other options need be configured and no real servers
-                                   need be present in the VIP. take care when using stunnel_proxy=on
-          --timeout                (on:off) Enable or disable client / real server timeout
-          --timeout_client         (12h) Client Timeout by default 12 hours
-          --timeout_server         (12h) Real Server Timeout by default 12 hours
-          --redirect_code          (301:302:303:307:308) Only used if force_to_https=on
-                                   301 (Moved Permanently), 302 (Found), 303 (See Other), 307 (Temporary Redirect), 308 (Permanent Redirect)
-          --no_write               (on:off) This is used to enable manual configuration of the VIP.
-                                   not suggested for full lbcli use as you can not edit the manual configuration unless you upload it manually
-          --waf_label              (WAF_VIP_NAME) When creating a WAF the WAF Service will add this to the VIP,
-                                   Care needs to be taken when changing this as the WAF also needs updating.
-          --clear_stick_drain      (on:off) Do you want to clear the stick table on drain of the RIP in the VIP
-          --compression            (on:off) Do we enable compression on the VIP, only available in mode=http
-          --autoscale_group        (YOUR AUTOSCALE GROUP NAME)  if in AWS the name of the autoscale group you have defined.
-          --cookie_maxidle         (30m) Cookie Max Idle Duration.
-          --cookie_maxlife         (12h) Cookie Max Life Duration.
-          --source_address         (192.168.2.21) IP Address used for health check source IP
-          --backend_encryption     (on:off) Only available on mode=http. Do we want to re-encrypt to the real server?
-          --enable_hsts            (on:off) Only available in mode=http
-          --hsts_month             (6) Months the HSTS is valid 3-24 months, Only available in mode=http
-          --xff_ip_pos             (-1) Move the XFF header back one in the list to show client IP in correct place. This is only available when persistence=xff
-          --invalid_http           (on:off) Accept invalid http requests. this is only available in mode=http
-          --send_proxy             (none:v1:v2:v2_ssl:v2_ssn_cn)  Send Proxy Protocol
-                                   None, Send Proxy V1, Send Proxy V2, Send Proxy V2 SSL, Send Proxy V2 SSL CN
-          --as_port                (1234) Autoscale Port on the real servers you have defined in AWS
-          --http_request           (on:off) Default is on to enable Slowlaris protection. You would usually not need to disable this unless the headers are delayed more than 5 seconds
-          --stunnel_source         (1.2.3.4) Source IP of Stunnel VIP
-          --proxy_bind             (name of Layer7 VIP)  Name of the Layer7 VIP to bind to.
-          --slave_ip               (Azure Only) 
-          --tunneltimeout          Value in seconds for WebSockets
-          --redispatch             (on:off) turn redispatch on or off
-          --fallback_encrypt       (on:off) Encrypt connection to the fallback server if it is a TLS Connection
-          --http_reuse_connection  (on:off) It is possible to reuse idle connections to serve requests from the same session which can be beneficial in terms of performance. 
-                                   It is important to note that the first request of a session is always sent over its own connection, and only subsequent requests may be dispatched 
-                                   over other existing connections.
-          --tproxy                 (on:off) Turn tproxy on and off on the VIP level. 
-          --send_rip_name_as_host  (on:off) Use the real server name as hostname to send to the backend 
+    --ip  expects an argument of type ip
 
-    lbcli --action clone-vip --vip (VIP to Clone) --clone (New Cloned VIP)  --ip (new IP Address) |or| --ports (new ports)
+    Adds a floating IP to the cluster.
 
-          Optional combination of --ip --ports to change IP Addresss or pots of the cloned VIP
-          If you use any option in edit-vip the cloned VIP will also be updated to reflect the syntax supplied.
+[1;37mlbcli add-gslb-globalname - Add a global name[0m
 
-          example lbcli --action clone-vip --vip source --vip dest --ip 192.168.100.120 --ports 443 --persistence ip --mode tcp
+[1;37mAlternate invocations:[0m
 
-          This will set the persistence to IP and mode to tcp, it may have been mode http in the source VIP. 
- 
-RIP Actions Usage:
+    lbcli --action gslb --function add --section globalnames
 
-Add Layer 4 RIP:        
-    lbcli --action add-rip --vip (VIP Name)  --rip (RIP Name) \
-          --ip (RIP IP Address) \
-          --weight (Weight value) \
-          --port (Port Value) \
-          --minconns (minconns) \
-          --maxconns (maxconns)
+[1;37mRequired Arguments:[0m
 
-Add Layer 7 RIP:        
-    lbcli --action add-rip --vip (VIP Name) --rip (RIP Name) \
-          --ip (RIP IP Address) \
-          --weight (Weight value) \
-          --port (Port value) \
-          --minconns (minconns) \# Optional
-          --maxconns (maxconns) \# Optional 
-          --encrypted (on|off)    # Optional 
+    --name      expects an argument of type string
+    --hostname  expects an argument of type hostname
+    --ttl       expects an argument of type uint
 
-Delete RIP:             
-    lbcli --action delete-rip --vip (VIP Name) --rip (RIP Name)
+    Adds a GSLB global name.
 
-Edit RIP:               
-    lbcli --action edit-rip --vip (VIP Name) --rip (RIP Name) \
-          --ip \
-          --port \
-          --weight \
-          --minconns \ # Optional 
-          --maxconns    # Optional 
-          OPTIONAL Layer7: --encrypted
-    
-WAF Action Usage:
+[1;37mlbcli add-gslb-member - Add a member[0m
 
-Add WAF:                
-    lbcli --action add-waf --vip (VIP Name) --waf (WAF Name) 
+[1;37mAlternate invocations:[0m
 
-Edit WAF:              
-    lbcli --action edit-waf --waf (WAF Name) \
-          --in_anom_score (1:100) \
-          --out_anom_score (1:100) \
-          --req_data (on:off) \
-          --resp_data (on:off) \
-          --audit (on:off) \
-          --proxytimeout (60) \
-          --dlogin (on:off) \
-          --dlogin_mode (static:openid_google) \
-          --dlogin_location (/:/dir:/file.html) \
-          --dlogin_static_username (username) \
-          --dlogin_static_password (password) \
-          --dlogin_google_clientid (Google API Clien ID) \
-          --dlogin_google_clientsecret (secret) \
-          --dlogin_google_redirect_uri (redirect uri) \
-          --dlogin_google_passphrase (passphrase) \
-          --dlogin_google_allowed_domain (example.com email domain) \
-          --rule_engine (on:off) \
-          --disable_waf (on|off) \
-          --cacheaccel (on|off) \
-          --cache_nocache_files (file or regex) \
-          --cache_force_cache (on|off) \
-          --cache_object_size (5120)
+    lbcli --action gslb --function add --section members
 
+[1;37mRequired Arguments:[0m
 
-Delete WAF:             
-    lbcli --action delete-waf --vip (VIP Name) --waf (WAF Name)
+    --name        expects an argument of type string
+    --monitor-ip  expects an argument of type ip
+    --ip          expects an argument of type ip
+    --weight      expects an argument of type gslb-weight
+    --add-pool    expects an argument of type string
 
+    Adds a GSLB member.
 
-Floating IP Action Usage:
+[1;37mlbcli add-gslb-pool - Add a pool[0m
 
-Add Floating IP:       
-    lbcli --action add-floating-ip --ip (IP Address)
+[1;37mAlternate invocations:[0m
 
-Remove Floating IP:     
-    lbcli --action delete-floating-ip --ip (IP Address)
+    lbcli --action gslb --function add --section pools
 
-Fix Floating IP:        
-    lbcli --action fix-floating-ip --ip (IP Address)
+[1;37mRequired Arguments:[0m
 
-    fix-floating-ip removes and re-adds the floating IP, care is needed if the IP is up on the 
-    wrong interface and it has other base IP addresses within the same subnet. we will get confused. 
-    First ip ad del x.x.x.x/cidr dev ethx to remove all IP's on the wrong interface
-    then run lbcli --action fix-floating-ip --ip ip.add.re.ss
+    --add-globalname          expects an argument of type string
+    --fallback                argument should be one of any or refuse
+    --monitor                 argument should be one of http, tcp, forced,
+                              external or externaldynamicweight
+    --monitor-interval        expects an argument of type uint
+    --name                    expects an argument of type string
 
-  
-Services Actions Usage: 
-    lbcli --action restart-ldirectord 
-    lbcli --action restart-haproxy         
-    lbcli --action restart-heartbeat             
-    lbcli --action restart-pound           
-    lbcli --action restart-stunnel      
-    lbcli --action restart-collectd         
-    lbcli --action restart-firewall          
-    lbcli --action restart-syslog           
-    lbcli --action restart-snmp               
-    lbcli --action restart-waf    
-    lbcli --action restart-autoscaling   
-    lbcli --action restart-azha
+[1;37mOptional Arguments:[0m
 
-    lbcli --action reload-apache       
-    lbcli --action reload-ldirectord          
-    lbcli --action reload-haproxy                
-    lbcli --action reload-waf
-    lbcli --action reload-syslog           
-    lbcli --action reload-stunnel          
-    lbcli --action reload-heartbeat 
-    lbcli --action reload-gslb
-    lbcli --action status-gslb
+    --add-member              expects an argument of type string
+    --lb-method               argument should be one of wrr, twrr or fogroup
+    --max-addrs-returned      expects an argument of type uint
+    --monitor-expected-codes  expects an argument of type http-code
+    --monitor-expected-codes  expects an argument of type http-code
+    --monitor-hostname        expects an argument of type hostname
+    --monitor-parameters      expects an argument of type string
+    --monitor-port            expects an argument of type port
+    --monitor-result          expects an argument of type string
+    --monitor-retries         expects an argument of type uint
+    --monitor-return-match    expects an argument of type string
+    --monitor-script          expects an argument of type string
+    --monitor-send-string     expects an argument of type string
+    --monitor-status          argument should be one of up or down
+    --monitor-timeout         expects an argument of type uint
+    --monitor-url-path        expects an argument of type string
+    --monitor-use-ssl         expects an argument of type bool
 
+    Adds a GSLB pool.
 
-    lbcli --action haproxy-clear-stick
+[1;37mlbcli add-gslb-topology - Add a topology[0m
 
-SSL Termination
+[1;37mAlternate invocations:[0m
 
-List Certificates:      
-    lbcli --action termination --type certificate --function list
+    lbcli --action gslb --function add --section topologies
 
-Create CSR:             
-    lbcli --action termination --type certificate --function csr \
-          --csrname (CSRNAME) \
-          --city (CITY) \
-          --province (COUNTY) \
-          --country (ISO COUNTRY CODE : GB for uk) \
-          --organisation (ORG) 
-          --unit (UNIT) 
-          --domain (example.com) 
-          --email (ssl@example.com) 
-          --csrsize (2048:4096) 
-          --signalgorithm sha256 \
-          --days (365)
+[1;37mRequired Arguments:[0m
 
-Upload SSL PEM/PFX:  Please refer to the blog below
-    http://www.loadbalancer.org/blog/how-do-i-automate-load-balancer-deployments/
-   
+    --name     expects an argument of type string
 
-Add Termination:        
-    lbcli --action termination --type stunnel --function add  --vip (VIPNAME) \
-          --ip (IP ADDRESS) \
-          --port (PORT) \
-          --backend_ip (BACKEND IP) \
-          --slave_ip (Azure Only) \
-          --backend_port (BACKEND PORT) \
-          --sslcert (SSLCERTNAME) \
-          --disabletlsv1_1  (on:off) \
-          --disabletlsv1_2 (on:off) \
-          --disabletlsv1_3 (on:off) \
-          --sslmode (high|fips|compatable|custom) \
-          --associated_to (Layer7 VIP to associate to, likely the same as --proxy_bind)
-          # --haproxy_ssl_link (This is a combination of VIP_Name^VIP^PORT or custom) # DEPRECIATED
-           
+[1;37mOptional Arguments:[0m
 
-Edit Termintaion:       
-    lbcli --action termination --type stunnel --function edit  --vip (VIPNAME) \
-          --ip (IP ADDRESS) \
-          --port (PORT) \
-          --backend_ip (BACKEND IP) \
-          --slave_backend_ip \ #(BACKEND IP ON THE SLAVE IN AZURE)
-          --backend_port (BACKEND PORT) \
-          --sslcert (SSLCERTNAME) \
-          --sslmode (high|fips|compatable|custom) \
-          --associated_to (Layer7 VIP to associate to, likely the same as --proxy_bind) \
-          #  --haproxy_ssl_link #(This is a combination of VIP_Name^VIP^PORT or custom) DEPRECIATED \
-          --ciphers \ # This and below syntax are optional. 
-          --disablesslv2 (on:off) \
-          --disablesslv3 (on:off) \
-          --disabletlsv1 (on:off) \
-          --stunneldnsdelay (on:off) \
-          --stunnelproxy (on:off) \
-          --servercipherorder (on:off) \
-          --emptyfragments  (on:off) \
-          --stunnelrenegotiation (on:off) \
-          --stunneltimetoclose 0 \
-          --proxy_bind L7VIPLabel\
-          --slave_ip \     (SLAVE IP IN AZURE)
-          --slave_source \ (SLAVE IP IN AZURE)
-          --disabletlsv1_1 (on:off)\
-          --disabletlsv1_2 (on:off)\
-          --disabletlsv1_3 (on:off) \
-          --sslcert server  : "server" # is the inbuilt default SSL Certificate 
+    --add-ips  expects an argument of type string
 
-Delete Termintaion:     
-    lbcli --action termination --type stunnel --function delete --vip (VIPNAME)
+    Adds a GSLB topology.
 
-  
-SSL SNI Features
+[1;37mlbcli add-header - Add a header[0m
 
-ADD SNI Rules:          
-    lbcli --action termination --type stunnel --function edit --vip (VIP) --sni add \
-          --sni_name (SNINAME) \
-          --sni_rule (example.com) \
-          --sni_cert (SSLCERTNAME) \
-          --sni_backend_proxyprotocol (on:off) \
-          --sni_backend_service (L7VPIName) \ if you define sni_backend_ip and sni_slave_backend_ip in you must say sni_backend_service is custom
-          --sni_backend_ip (SNI_BACKEND_IP) \
-          --sni_slave_backend_ip (SLAVE_SNI_BACKEND_IP) \
-          --sni_backend_port (BACKEND_PORT)
+[1;37mAlternate invocations:[0m
 
+    lbcli --action headers --function add
 
-EDIT SNI Rules:        
-    lbcli --action termination --type stunnel --function edit --vip (VIP) --sni edit \
-          --sni_name (Existing SNINAME) \
-          --sni_rule (example.com) \
-          --sni_cert (SSLCERTNAME) \
-          --sni_backend_proxyprotocol (on:off) \
-          --sni_backend_service (L7VPIName) \
-          --sni_slave_backend_ip (SLAVE_SNI_BACKEND_IP) \
-          # or use below to replace sni_backend_service name and define ip and port
-          --sni_backend_ip (SNI_BACKEND_IP) --sni_backend_port (BACKEND_PORT)
+[1;37mRequired Arguments:[0m
 
+    --header-type    argument should be one of http-request or http-response
+    --vip            expects an argument of type existing-l7-vip
+    --header-option  argument should be one of add, set, del, delete or
+                     replace
+    --header-name    expects an argument of type string
+    --header-value   expects an argument of type string
 
-DELETE SNI Rules:       
-    lbcli --action termination --type stunnel --function edit --vip (VIP) --sni delete \
-          --sni_name (SNINAME) \
-          --sni_rule (example.com)
+    Adds a header rule to the specified layer 7 virtual service.
 
-Layer7 ACL Features
+[1;37mlbcli add-healthcheck - Add a health check[0m
 
-LIST ACL Rules:         
-    lbcli --action acl --function list --vip (VIPNAME)
+[1;37mRequired Arguments:[0m
 
-ADD ACL Rules:          
-    lbcli --action acl --function add --vip (L7VIPNAME) \
-          --pathtype (path_beg|path_end|hdr_host|hdr_beg|query|src_blk) \                           
-          --path (URI PATH) \
-          --redirecttype (url_loc|url_pre|backend|use_server) \
-          --location (URL|BACKEND) \
-          --bool (equal|notequal)
+    --label   expects an argument of type string
+    --kind    argument should be one of check or gslbcheck defaults to check
+    --master  expects an argument of type string
 
-DELETE ACL Rules:       
-    lbcli --action acl --function delete --vip (L7VIPNAME) \
-          --pathtype (path_beg|path_end|hdr_host|hdr_beg|query|src_blk) \
-          --path (URI PATH) \
-          --redirecttype (url_loc|url_pre|backend|use_server) \
-          --location (URL|BACKEND) \
-          --bool (equal|notequal)
+[1;37mOptional Arguments:[0m
 
-Layer7 Header Features
+    --slave   expects an argument of type string
 
-Add Header Rules        
-    lbcli --action headers --function add --vip (VIP Name) \
-          --header_type (http-request|http-response) \
-          --header_option (add|set|del|replace) \
-          --header_name (X-Custom-Header) \
-          --header_value (X-Custom-Value)
+    Add a health check to the cluster.  If the --slave argument is omitted
+    then the script passed to the --master argument will be used on both
+    appliances.
 
-Delete Header Rules     
-    lbcli --action headers --function delete --vip (VIP Name) \
-          --header_option (add|set|del|replace) \                           
-          --header_name (X-Custom-Header)
+[1;37mlbcli add-layer4-server - Add a layer 4 real server[0m
 
-List Header Rules       
-    lbcli --action headers --function list --vip (VIP Name)
+[1;37mAlternate invocations:[0m
 
+    lbcli --action add-rip --layer 4
 
-Firewall Lockdown script:   
-    lbcli --action lockdown --enabled on --network 0.0.0.0/0
-    
-You turn the lockdown features 'on' and 'off' and the network is your admin 
-subnet but if you do not wish to lockdown the management network then use 
-ip/cidr 0.0.0.0/0 
+[1;37mRequired Arguments:[0m
 
-List options
+    --vip       expects an argument of type existing-vip
+    --ip        expects an argument of type ip
+    --rip       expects an argument of type rip
 
-List floating IP's      
+[1;37mOptional Arguments:[0m
+
+    --port      expects an argument of type port
+    --weight    expects an argument of type rip-weight defaults to 100
+    --minconns  expects an argument of type uint
+    --maxconns  expects an argument of type uint
+
+    Adds a layer 4 real server to the specified virtual service.
+
+[1;37mlbcli add-layer4-service - Add a layer 4 virtual service[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action add-vip --layer 4
+
+[1;37mRequired Arguments:[0m
+
+    --ip               expects an argument of type ip
+    --ports            expects an argument of type port-list
+    --vip              expects an argument of type vip
+
+[1;37mOptional Arguments:[0m
+
+    --forwarding       argument should be one of gate, masq, ipip or snat
+                       defaults to gate
+    --protocol         argument should be one of tcp, udp, tcpudp, ops or fwm
+                       defaults to tcp
+    --slave-ip         expects an argument of type ip
+    --granularity      expects an argument of type cidr
+    --fallback-ip      expects an argument of type ip
+    --fallback-port    expects an argument of type port
+    --persistent       expects an argument of type bool
+    --persist-time     expects an argument of type uint
+    --scheduler        argument should be one of wlc, wrr or dh
+    --feedback         argument should be one of agent or none
+    --email            expects an argument of type string
+    --email-from       expects an argument of type string
+    --check-service    argument should be one of imap, imaps, ldap, nntp,
+                       mysql or radius
+    --check-vhost      expects an argument of type string
+    --check-database   expects an argument of type string
+    --check-login      expects an argument of type string
+    --check-password   expects an argument of type string
+    --check-type       argument should be one of negotiate, connect, ping,
+                       external, off, on, 5 or 10
+    --check-port       expects an argument of type port
+    --check-request    expects an argument of type string
+    --check-response   expects an argument of type string
+    --check-secret     expects an argument of type string
+    --check-command    expects an argument of type string
+    --feedback-port    expects an argument of type port
+    --fallback-local   expects an argument of type bool
+    --autoscale-group  expects an argument of type string
+
+    Adds a layer 4 virtual service to the cluster.
+
+[1;37mlbcli add-layer7-server - Add a layer 7 real server[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action add-rip --layer 7
+
+[1;37mRequired Arguments:[0m
+
+    --vip            expects an argument of type existing-vip
+    --ip             expects an argument of type ip
+    --rip            expects an argument of type rip
+
+[1;37mOptional Arguments:[0m
+
+    --port           expects an argument of type port
+    --weight         expects an argument of type rip-weight defaults to 100
+    --encrypted      expects an argument of type bool defaults to off
+    --redir          expects an argument of type string
+    --redir-enabled  expects an argument of type bool defaults to off
+    --minconns       expects an argument of type uint
+    --maxconns       expects an argument of type uint
+
+    Adds a layer 7 real server to the specified virtual service.
+
+[1;37mlbcli add-layer7-service - Add a layer 7 virtual service[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action add-vip --layer 7
+
+[1;37mRequired Arguments:[0m
+
+    --ip                      expects an argument of type ip
+    --ports                   expects an argument of type port-list
+    --vip                     expects an argument of type vip
+
+[1;37mOptional Arguments:[0m
+
+    --mode                    argument should be one of tcp, ip or http
+                              defaults to http
+    --fallback-ip             expects an argument of type ip
+    --fallback-port           expects an argument of type port
+    --service-type            expects an argument of type string
+    --slave-ip                expects an argument of type ip
+    --appsession-cookie       expects an argument of type string
+    --as-port                 expects an argument of type port
+    --autoscale-group         expects an argument of type string
+    --backend-encryption      expects an argument of type bool
+    --backend-only            expects an argument of type bool
+    --check-host              expects an argument of type string
+    --check-negate-response   expects an argument of type bool
+    --check-password          expects an argument of type string
+    --check-port              expects an argument of type port
+    --check-receive           expects an argument of type string
+    --check-request           expects an argument of type string
+    --check-type              argument should be one of connect, external,
+                              negotiate_http, negotiate_https,
+                              negotiate_http_head, negotiate_https_head,
+                              negotiate_http_options, negotiate_https_options,
+                              mysql or none
+    --check-username          expects an argument of type string
+    --clear-stick-drain       expects an argument of type bool
+    --compression             expects an argument of type bool
+    --cookie-maxidle          expects an argument of type haproxy-interval
+    --cookie-maxlife          expects an argument of type haproxy-interval
+    --cookiename              expects an argument of type string
+    --enable-hsts             expects an argument of type bool
+    --encrypt-all-backends    expects an argument of type bool
+    --external-check-script   expects an argument of type existing-healthcheck
+    --fallback-disabled       expects an argument of type bool
+    --fallback-encrypt        expects an argument of type bool
+    --fallback-persist        expects an argument of type bool
+    --feedback-method         argument should be one of agent or none
+    --feedback-port           expects an argument of type port
+    --force-to-https          expects an argument of type bool
+    --force-to-https-port     expects an argument of type port
+    --forward-for             expects an argument of type bool
+    --hsts-month              expects an argument of type uint
+    --http-pipeline           argument should be one of http_keep_alive,
+                              http_close, http_server_close or
+                              http_force_close
+    --http-pretend-keepalive  expects an argument of type bool
+    --http-request            expects an argument of type bool
+    --invalid-http            expects an argument of type bool
+    --maxconn                 expects an argument of type uint
+    --no-write                expects an argument of type bool
+    --persist-table-size      expects an argument of type uint
+    --persist-time            expects an argument of type uint
+    --persistence             argument should be one of none, ip, tcp,
+                              sslsesid, http, appsession, rdp-session,
+                              rdp-cookie, http_ip, waf or last
+    --proxy-bind              expects an argument of type string
+    --redirect-code           expects an argument of type http-300-code
+    --redispatch              expects an argument of type bool
+    --reuse-idle              expects an argument of type bool
+    --scheduler               argument should be one of first, roundrobin or
+                              leastconn
+    --send-proxy              argument should be one of none, v1, v2, v2_ssl
+                              or v2_ssl_cn defaults to none
+    --send-rip-name-as-host   expects an argument of type bool
+    --slave-ip                expects an argument of type ip
+    --source-address          expects an argument of type ip
+    --stunnel-source          expects an argument of type string
+    --stunneltproxy           expects an argument of type bool
+    --tcp-keep-alive          expects an argument of type bool
+    --timeout                 expects an argument of type bool
+    --timeout-client          expects an argument of type haproxy-interval
+    --timeout-server          expects an argument of type haproxy-interval
+    --tproxy                  expects an argument of type bool
+    --tunneltimeout           expects an argument of type haproxy-interval
+    --use-content-inspection  expects an argument of type bool
+    --xff-ip-pos              expects an argument of type int
+
+    Adds a layer 7 virtual service to the cluster.
+
+[1;37mlbcli add-pbr - Add a PBR rule[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action pbr --function set
+    lbcli set-pbr
+
+[1;37mRequired Arguments:[0m
+
+    --ip       expects an argument of type ip
+    --gateway  expects an argument of type ip
+
+    Adds a policy based routing rule to the appliance.
+
+[1;37mlbcli add-static-ip - Add a static IP address[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action address --function add
+
+[1;37mRequired Arguments:[0m
+
+    --interface  expects an argument of type existing-interface
+    --address    expects an argument of type ip-with-optional-cidr
+
+[1;37mOptional Arguments:[0m
+
+    --cidr       expects an argument of type cidr
+
+    Adds a static IP to the specified virtual service.
+
+[1;37mlbcli add-static-route - Add a static route[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action route --function static --type add
+
+[1;37mRequired Arguments:[0m
+
+    --gateway  expects an argument of type ip
+    --network  expects an argument of type ip-with-optional-cidr
+
+[1;37mOptional Arguments:[0m
+
+    --cidr     expects an argument of type cidr
+
+    Adds a route via the given gateway to the specified network.
+
+[1;37mlbcli add-termination - Add an SSL Termination[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action termination --function add --type stunnel
+
+[1;37mRequired Arguments:[0m
+
+    --port                  expects an argument of type port
+    --disablesslv2          expects an argument of type bool defaults to true
+    --disablesslv3          expects an argument of type bool defaults to true
+    --disabletlsv1          expects an argument of type bool defaults to true
+    --stunneldnsdelay       expects an argument of type bool defaults to true
+    --stunnelproxy          expects an argument of type bool defaults to false
+    --servercipherorder     expects an argument of type bool defaults to true
+    --emptyfragments        expects an argument of type bool defaults to true
+    --stunnelrenegotiation  expects an argument of type bool defaults to true
+    --stunneltimetoclose    expects an argument of type uint defaults to 0
+    --sslcert               expects an argument of type existing-certificate
+                            defaults to server
+    --proxy-bind            expects an argument of type bool defaults to false
+    --disabletlsv1-1        expects an argument of type bool defaults to false
+    --disabletlsv1-2        expects an argument of type bool defaults to false
+    --disabletlsv1-3        expects an argument of type bool defaults to false
+    --sslmode               argument should be one of high, fips or compatable
+                            defaults to high
+
+[1;37mOptional Arguments:[0m
+
+    --vip                   expects an argument of type string
+    --associated-to         expects an argument of type existing-l7-vip
+    --proxy-bind            expects an argument of type existing-l7-vip
+    --source                expects an argument of type ip
+    --slave-source          expects an argument of type ip
+    --ciphers               expects an argument of type cipher-list
+    --ip                    expects an argument of type ip
+    --slave-ip              expects an argument of type ip
+    --backend-ip            expects an argument of type ip
+    --slave-backend-ip      expects an argument of type ip
+    --backend-port          expects an argument of type port
+    --stunnel-source        expects an argument of type string
+
+    Adds an SSL Termination to the cluster.
+
+[1;37mlbcli add-waf - Add a WAF[0m
+
+[1;37mRequired Arguments:[0m
+
+    --waf  expects an argument of type string
+    --vip  expects an argument of type existing-l7-vip
+
+    Adds a Web Application Firewall to the specified layer 7 virtual service.
+
+[1;37mlbcli clone-healthcheck - Clone a health check[0m
+
+[1;37mRequired Arguments:[0m
+
+    --label  expects an argument of type existing-healthcheck
+
+    Clone an existing health check on the cluster.
+
+[1;37mlbcli clone-layer4-service - Clone a virtual service.[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action clone-vip --layer 4
+
+[1;37mRequired Arguments:[0m
+
+    --vip              expects an argument of type existing-vip
+    --ip               expects an argument of type ip
+    --ports            expects an argument of type port-list
+    --clone            expects an argument of type label
+
+[1;37mOptional Arguments:[0m
+
+    --forwarding       argument should be one of gate, masq, ipip or snat
+    --protocol         argument should be one of tcp, udp, tcpudp, ops or fwm
+    --slave-ip         expects an argument of type ip
+    --granularity      expects an argument of type cidr
+    --fallback-ip      expects an argument of type ip
+    --fallback-port    expects an argument of type port
+    --persistent       expects an argument of type bool
+    --persist-time     expects an argument of type uint
+    --scheduler        argument should be one of wlc, wrr or dh
+    --feedback         argument should be one of agent or none
+    --email            expects an argument of type string
+    --email-from       expects an argument of type string
+    --check-service    argument should be one of imap, imaps, ldap, nntp,
+                       mysql or radius
+    --check-vhost      expects an argument of type string
+    --check-database   expects an argument of type string
+    --check-login      expects an argument of type string
+    --check-password   expects an argument of type string
+    --check-type       argument should be one of negotiate, connect, ping,
+                       external, off, on, 5 or 10
+    --check-port       expects an argument of type port
+    --check-request    expects an argument of type string
+    --check-response   expects an argument of type string
+    --check-secret     expects an argument of type string
+    --check-command    expects an argument of type string
+    --feedback-port    expects an argument of type port
+    --fallback-local   expects an argument of type bool
+    --autoscale-group  expects an argument of type string
+
+    Create a copy of the specified virtual service.
+
+[1;37mlbcli clone-layer7-service - Clone a virtual service.[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action clone-vip --layer 7
+
+[1;37mRequired Arguments:[0m
+
+    --vip                     expects an argument of type existing-vip
+    --ip                      expects an argument of type ip
+    --ports                   expects an argument of type port-list
+    --clone                   expects an argument of type label
+
+[1;37mOptional Arguments:[0m
+
+    --appsession-cookie       expects an argument of type string
+    --as-port                 expects an argument of type port
+    --autoscale-group         expects an argument of type string
+    --backend-encryption      expects an argument of type bool
+    --backend-only            expects an argument of type bool
+    --check-host              expects an argument of type string
+    --check-negate-response   expects an argument of type bool
+    --check-password          expects an argument of type string
+    --check-port              expects an argument of type port
+    --check-receive           expects an argument of type string
+    --check-request           expects an argument of type string
+    --check-type              argument should be one of connect, external,
+                              negotiate_http, negotiate_https,
+                              negotiate_http_head, negotiate_https_head,
+                              negotiate_http_options, negotiate_https_options,
+                              mysql or none
+    --check-username          expects an argument of type string
+    --clear-stick-drain       expects an argument of type bool
+    --compression             expects an argument of type bool
+    --cookie-maxidle          expects an argument of type haproxy-interval
+    --cookie-maxlife          expects an argument of type haproxy-interval
+    --cookiename              expects an argument of type string
+    --enable-hsts             expects an argument of type bool
+    --encrypt-all-backends    expects an argument of type bool
+    --external-check-script   expects an argument of type existing-healthcheck
+    --fallback-disabled       expects an argument of type bool
+    --fallback-encrypt        expects an argument of type bool
+    --fallback-persist        expects an argument of type bool
+    --feedback-method         argument should be one of agent or none
+    --feedback-port           expects an argument of type port
+    --force-to-https          expects an argument of type bool
+    --force-to-https-port     expects an argument of type port
+    --forward-for             expects an argument of type bool
+    --hsts-month              expects an argument of type uint
+    --http-pipeline           argument should be one of http_keep_alive,
+                              http_close, http_server_close or
+                              http_force_close
+    --http-pretend-keepalive  expects an argument of type bool
+    --http-request            expects an argument of type bool
+    --invalid-http            expects an argument of type bool
+    --maxconn                 expects an argument of type uint
+    --no-write                expects an argument of type bool
+    --persist-table-size      expects an argument of type uint
+    --persist-time            expects an argument of type uint
+    --persistence             argument should be one of none, ip, tcp,
+                              sslsesid, http, appsession, rdp-session,
+                              rdp-cookie, http_ip, waf or last
+    --proxy-bind              expects an argument of type string
+    --redirect-code           expects an argument of type http-300-code
+    --redispatch              expects an argument of type bool
+    --reuse-idle              expects an argument of type bool
+    --scheduler               argument should be one of roundrobin, leastconn
+                              or first
+    --send-proxy              expects an argument of type bool
+    --send-rip-name-as-host   expects an argument of type bool
+    --slave-ip                expects an argument of type ip
+    --source-address          expects an argument of type ip
+    --stunnel-source          expects an argument of type string
+    --stunneltproxy           expects an argument of type bool
+    --tcp-keep-alive          expects an argument of type bool
+    --timeout                 expects an argument of type bool
+    --timeout-client          expects an argument of type haproxy-interval
+    --timeout-server          expects an argument of type haproxy-interval
+    --tproxy                  expects an argument of type bool
+    --tunneltimeout           expects an argument of type haproxy-interval
+    --use-content-inspection  expects an argument of type bool
+    --xff-ip-pos              expects an argument of type int
+
+    Create a copy of the specified virtual service.
+
+[1;37mlbcli delete-acl - Delete an ACL rule[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action acl --function del
+    lbcli --action acl --function delete
+    lbcli del-acl
+
+[1;37mRequired Arguments:[0m
+
+    --vip           expects an argument of type existing-l7-vip
+    --bool          argument should be one of equal or notEqual defaults to
+                    equal
+    --denystatus    argument should be one of 200, 400, 403, 405, 408, 425,
+                    429, 500, 502, 503 or 504 defaults to 403
+    --freetype      expects an argument of type string defaults to 
+    --headername    expects an argument of type string defaults to 
+    --location      expects an argument of type string defaults to 
+    --path          expects an argument of type string defaults to /
+    --pathtype      argument should be one of path_reg, path_beg, path_end,
+                    hdr_host, hdr_beg, query, src_blk, header, path, sni,
+                    ssl_sni, dst_port, flag or freetype
+    --redirecttype  argument should be one of url_loc, url_pre, backend, drop,
+                    none or use_server
+
+    Delete the first matching ACL rule from the specified layer 7 virtual
+    service.
+
+[1;37mlbcli delete-floating-ip - Delete a floating IP[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli del-floating-ip
+
+[1;37mRequired Arguments:[0m
+
+    --ip  expects an argument of type ip
+
+    Delete a floating IP from the cluster.
+
+[1;37mlbcli delete-gslb-globalname - Delete a global name[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function del --section globalnames
+    lbcli --action gslb --function delete --section globalnames
+    lbcli del-gslb-globalname
+
+[1;37mRequired Arguments:[0m
+
+    --name  expects an argument of type string
+
+    Delete the specified GSLB global name.
+
+[1;37mlbcli delete-gslb-member - Delete a member[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function del --section members
+    lbcli --action gslb --function delete --section members
+    lbcli del-gslb-member
+
+[1;37mRequired Arguments:[0m
+
+    --name  expects an argument of type string
+
+    Delete the specified GSLB member.
+
+[1;37mlbcli delete-gslb-pool - Delete a pool[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function del --section pools
+    lbcli --action gslb --function delete --section pools
+    lbcli del-gslb-pool
+
+[1;37mRequired Arguments:[0m
+
+    --name  expects an argument of type string
+
+    Delete the specified GSLB pool.
+
+[1;37mlbcli delete-gslb-topology - Delete a member[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function del --section topologies
+    lbcli --action gslb --function delete --section topologies
+    lbcli del-gslb-topology
+
+[1;37mRequired Arguments:[0m
+
+    --name  expects an argument of type string
+
+    Delete the specified GSLB member.
+
+[1;37mlbcli delete-header - Delete a header rule[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action headers --function delete
+    lbcli --action headers --function del
+    lbcli del-header
+
+[1;37mRequired Arguments:[0m
+
+    --vip            expects an argument of type existing-l7-vip
+    --header-option  argument should be one of add, set, del, delete or
+                     replace
+    --header-name    expects an argument of type string
+
+    Delete the first matching header rule from the specified layer 7 virtual
+    service.
+
+[1;37mlbcli delete-healthcheck - Delete a health check[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli del-healthcheck
+
+[1;37mRequired Arguments:[0m
+
+    --label  expects an argument of type existing-healthcheck
+
+    Delete an existing health check from the cluster.
+
+[1;37mlbcli delete-pbr - Delete a header rule[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action pbr --function del
+    lbcli --action pbr --function delete
+    lbcli del-pbr
+
+[1;37mRequired Arguments:[0m
+
+    --ip       expects an argument of type ip
+    --gateway  expects an argument of type ip
+
+    Delete the first matching header rule from the specified layer 7 virtual
+    service.
+
+[1;37mlbcli delete-server - Delete a real server[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli del-rip
+    lbcli delete-rip
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-vip
+    --rip  expects an argument of type existing-rip
+
+    Delete the real server from the specified virtual service.
+
+[1;37mlbcli delete-service - Delete a virtual service[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli del-service
+    lbcli del-vip
+    lbcli delete-vip
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-vip
+
+    Delete a virtual service from the cluster.
+
+[1;37mlbcli delete-static-ip - Delete a static IP address[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action address --function delete
+    lbcli --action address --function del
+    lbcli del-static-ip
+
+[1;37mRequired Arguments:[0m
+
+    --interface  expects an argument of type existing-interface
+    --address    expects an argument of type ip-with-optional-cidr
+
+[1;37mOptional Arguments:[0m
+
+    --cidr       expects an argument of type cidr
+
+    Delete a static IP from the appliance.
+
+[1;37mlbcli delete-static-route - Delete a static route[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action route --function static --type del
+    lbcli --action route --function static --type delete
+    lbcli del-static-route
+
+[1;37mRequired Arguments:[0m
+
+    --network  expects an argument of type ip-with-optional-cidr
+
+[1;37mOptional Arguments:[0m
+
+    --cidr     expects an argument of type cidr
+
+    Delete a static route from the appliance.
+
+[1;37mlbcli delete-termination - Delete an SSL termination[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action termination --function del --type stunnel
+    lbcli --action termination --function delete --type stunnel
+    lbcli del-termination
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-termination
+
+    Delete an SSL termination from the appliance.
+
+[1;37mlbcli delete-waf - Delete a WAF[0m
+
+[1;37mRequired Arguments:[0m
+
+    --waf  expects an argument of type existing-waf
+    --vip  expects an argument of type existing-vip
+
+    Delete the specified Web Application Firewall from the cluster.
+
+[1;37mlbcli disable-api - Disable the API endpoint[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action api --function disable
+
+    Disable the API endpoint on the appliance.
+
+[1;37mlbcli disable-floating-ip - Disable Floating IP.[0m
+
+    Make it so that the given floating IP cannot be made active on this
+    appliance.
+
+[1;37mlbcli drain - Drain a real server[0m
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-vip
+    --rip  expects an argument of type existing-rip
+
+    Drain connections from the specified real server.  No new connections will
+    be allowed to the real server but existing connections will remain until
+    they are closed.
+
+[1;37mlbcli edit-gslb-globalname - Edit a global name[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function edit --section globalnames
+
+[1;37mRequired Arguments:[0m
+
+    --name      expects an argument of type string
+    --hostname  expects an argument of type hostname
+    --ttl       expects an argument of type uint
+
+    Edit a GSLB global name.
+
+[1;37mlbcli edit-gslb-member - Edit a member[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function edit --section members
+
+[1;37mRequired Arguments:[0m
+
+    --name         expects an argument of type string
+
+[1;37mOptional Arguments:[0m
+
+    --add-pool     expects an argument of type string
+    --delete-pool  expects an argument of type string
+    --ip           expects an argument of type ip
+    --weight       expects an argument of type gslb-weight
+    --monitor-ip   expects an argument of type ip
+
+    Edit a GSLB member.
+
+[1;37mlbcli edit-gslb-pool - Edit a pool[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function edit --section pools
+
+[1;37mRequired Arguments:[0m
+
+    --name                    expects an argument of type string
+
+[1;37mOptional Arguments:[0m
+
+    --add-globalname          expects an argument of type string
+    --add-member              expects an argument of type string
+    --delete-globalname       expects an argument of type string
+    --delete-member           expects an argument of type string
+    --fallback-method         expects an argument of type string
+    --lb-method               argument should be one of wrr, twrr or fogroup
+    --max-addrs-returned      expects an argument of type string
+    --monitor                 argument should be one of http, tcp, forced,
+                              external or externaldynamicweight
+    --monitor-expected-codes  expects an argument of type http-code
+    --monitor-hostname        expects an argument of type string
+    --monitor-interval        expects an argument of type string
+    --monitor-parameters      expects an argument of type string
+    --monitor-port            expects an argument of type string
+    --monitor-result          expects an argument of type string
+    --monitor-retries         expects an argument of type string
+    --monitor-return-match    expects an argument of type string
+    --monitor-script          expects an argument of type string
+    --monitor-send-string     expects an argument of type string
+    --monitor-status          argument should be one of up or down
+    --monitor-timeout         expects an argument of type string
+    --monitor-url-path        expects an argument of type string
+    --monitor-use-ssl         expects an argument of type bool
+
+    Edit a GSLB pool.
+
+[1;37mlbcli edit-gslb-topology - Edit a topology[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function edit --section topologies
+
+[1;37mRequired Arguments:[0m
+
+    --name        expects an argument of type string
+
+[1;37mOptional Arguments:[0m
+
+    --add-ips     expects an argument of type string
+    --delete-ips  expects an argument of type string
+
+    Edit a GSLB topology.
+
+[1;37mlbcli edit-healthcheck - Modify a health check[0m
+
+[1;37mRequired Arguments:[0m
+
+    --label      expects an argument of type existing-healthcheck
+
+[1;37mOptional Arguments:[0m
+
+    --new-label  expects an argument of type string
+    --kind       argument should be one of check or gslbcheck
+    --master     expects an argument of type string
+    --slave      expects an argument of type string
+
+    Modify an existing health check on the cluster.  If the --master argument
+    is omitted then the --slave argument cannot be specified.
+
+[1;37mlbcli edit-layer4-server - Edit a layer 4 real server[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action edit-rip --layer 4
+
+[1;37mRequired Arguments:[0m
+
+    --vip       expects an argument of type existing-vip
+    --rip       expects an argument of type existing-rip
+
+[1;37mOptional Arguments:[0m
+
+    --ip        expects an argument of type ip
+    --port      expects an argument of type port
+    --weight    expects an argument of type rip-weight
+    --minconns  expects an argument of type uint
+    --maxconns  expects an argument of type uint
+
+    Edit the specified layer 4 real server.
+
+[1;37mlbcli edit-layer4-service - Edit a layer 4 virtual service[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action edit-vip --layer 4
+
+[1;37mRequired Arguments:[0m
+
+    --vip                    expects an argument of type existing-vip
+
+[1;37mOptional Arguments:[0m
+
+    --autoscale-group        expects an argument of type string
+    --check-command          expects an argument of type string
+    --check-database         expects an argument of type string
+    --check-login            expects an argument of type string
+    --check-password         expects an argument of type string
+    --check-port             expects an argument of type port
+    --check-request          expects an argument of type string
+    --check-response         expects an argument of type string
+    --check-secret           expects an argument of type string
+    --check-service          argument should be one of imap, imaps, ldap,
+                             nntp, mysql or radius
+    --check-type             argument should be one of negotiate, connect,
+                             ping, external, off, on, 5 or 10
+    --check-vhost            expects an argument of type string
+    --email                  expects an argument of type string
+    --email-from             expects an argument of type string
+    --fallback-ip            expects an argument of type ip
+    --fallback-local         expects an argument of type bool
+    --fallback-port          expects an argument of type port
+    --feedback               argument should be one of agent or none
+    --feedback-port          expects an argument of type port
+    --force-to-https-port    expects an argument of type port-or-empty
+    --forwarding             argument should be one of snat, masq, gate or
+                             ipip
+    --granularity            expects an argument of type cidr
+    --ip                     expects an argument of type ip
+    --negate-response        expects an argument of type bool
+    --persist-time           expects an argument of type uint
+    --persistent             expects an argument of type bool
+    --ports                  expects an argument of type port-list
+    --protocol               argument should be one of ops, udp, tcp, tcpudp
+                             or fwm
+    --scheduler              argument should be one of wlc, wrr or dh
+    --send-rip-name-as-host  expects an argument of type bool
+    --slave-ip               expects an argument of type ip
+
+    Edit the specified layer 4 virtual service.
+
+[1;37mlbcli edit-layer7-server - Edit a layer 7 real server[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action edit-rip --layer 7
+
+[1;37mRequired Arguments:[0m
+
+    --vip            expects an argument of type existing-vip
+    --rip            expects an argument of type existing-rip
+
+[1;37mOptional Arguments:[0m
+
+    --ip             expects an argument of type ip
+    --port           expects an argument of type port
+    --weight         expects an argument of type rip-weight
+    --minconns       expects an argument of type uint
+    --maxconns       expects an argument of type uint
+    --encrypted      expects an argument of type bool
+    --redir          expects an argument of type string
+    --redir-enabled  expects an argument of type bool
+
+    Edit the specified layer 7 real server.
+
+[1;37mlbcli edit-layer7-service - Edit a layer 7 virtual service[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action edit-vip --layer 7
+
+[1;37mRequired Arguments:[0m
+
+    --vip                     expects an argument of type existing-vip
+
+[1;37mOptional Arguments:[0m
+
+    --appsession-cookie       expects an argument of type string
+    --as-port                 expects an argument of type port
+    --autoscale-group         expects an argument of type string
+    --backend-encryption      expects an argument of type bool
+    --check-host              expects an argument of type string
+    --check-negate-response   expects an argument of type bool
+    --check-password          expects an argument of type string
+    --check-port              expects an argument of type port
+    --check-receive           expects an argument of type string
+    --check-request           expects an argument of type string
+    --check-type              argument should be one of connect, external,
+                              negotiate_http, negotiate_https,
+                              negotiate_http_head, negotiate_https_head,
+                              negotiate_http_options, negotiate_https_options,
+                              mysql or none
+    --check-username          expects an argument of type string
+    --clear-stick-drain       expects an argument of type bool
+    --compression             expects an argument of type bool
+    --cookie-maxidle          expects an argument of type haproxy-interval
+    --cookie-maxlife          expects an argument of type haproxy-interval
+    --cookiename              expects an argument of type string
+    --enable-hsts             expects an argument of type bool
+    --encrypt-all-backends    expects an argument of type bool
+    --external-check-script   expects an argument of type existing-healthcheck
+    --fallback-disabled       expects an argument of type bool
+    --fallback-encrypt        expects an argument of type bool
+    --fallback-ip             expects an argument of type ip
+    --fallback-persist        expects an argument of type bool
+    --fallback-port           expects an argument of type port
+    --feedback-method         argument should be one of agent or none
+    --feedback-port           expects an argument of type port
+    --force-to-https          expects an argument of type bool
+    --force-to-https-port     expects an argument of type port
+    --forward-for             expects an argument of type bool
+    --hsts-month              expects an argument of type uint
+    --http-pipeline           argument should be one of http_keep_alive,
+                              http_close, http_server_close or
+                              http_force_close
+    --http-pretend-keepalive  expects an argument of type bool
+    --http-request            expects an argument of type bool
+    --invalid-http            expects an argument of type bool
+    --ip                      expects an argument of type ip
+    --maxconn                 expects an argument of type uint
+    --mode                    argument should be one of http or other_tcp
+    --no-write                expects an argument of type bool
+    --persist-table-size      expects an argument of type uint
+    --persist-time            expects an argument of type uint
+    --persistence             argument should be one of none, ip, tcp,
+                              sslsesid, http, appsession, rdp-session,
+                              rdp-cookie, http_ip, waf or last
+    --ports                   expects an argument of type port-list
+    --proxy-bind              expects an argument of type string
+    --redirect-code           expects an argument of type http-300-code
+    --redispatch              expects an argument of type bool
+    --reuse-idle              expects an argument of type bool
+    --scheduler               argument should be one of roundrobin, leastconn
+                              or first
+    --send-proxy              expects an argument of type bool
+    --send-rip-name-as-host   expects an argument of type bool
+    --slave-ip                expects an argument of type ip
+    --source-address          expects an argument of type ip
+    --stunnel-source          expects an argument of type string
+    --stunneltproxy           expects an argument of type bool
+    --tcp-keep-alive          expects an argument of type bool
+    --timeout                 expects an argument of type bool
+    --timeout-client          expects an argument of type haproxy-interval
+    --timeout-server          expects an argument of type haproxy-interval
+    --tproxy                  expects an argument of type bool
+    --tunneltimeout           expects an argument of type haproxy-interval
+    --use-content-inspection  expects an argument of type bool
+    --xff-ip-pos              expects an argument of type int
+
+    Edit the specified layer 7 virtual service.
+
+[1;37mlbcli edit-termination - Edit a SSL termination[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action termination --function edit --type stunnel
+
+[1;37mRequired Arguments:[0m
+
+    --vip                   expects an argument of type existing-termination
+    --proxy-bind            expects an argument of type bool defaults to false
+
+[1;37mOptional Arguments:[0m
+
+    --port                  expects an argument of type port
+    --associated-to         expects an argument of type existing-l7-vip
+    --proxy-bind            expects an argument of type existing-l7-vip
+    --disablesslv2          expects an argument of type bool
+    --disablesslv3          expects an argument of type bool
+    --disabletlsv1          expects an argument of type bool
+    --stunneldnsdelay       expects an argument of type bool
+    --stunnelproxy          expects an argument of type bool
+    --servercipherorder     expects an argument of type bool
+    --emptyfragments        expects an argument of type bool
+    --stunnelrenegotiation  expects an argument of type bool
+    --stunneltimetoclose    expects an argument of type uint
+    --sslcert               expects an argument of type existing-certificate
+    --disabletlsv1-1        expects an argument of type bool
+    --disabletlsv1-2        expects an argument of type bool
+    --disabletlsv1-3        expects an argument of type bool
+    --sslmode               argument should be one of high, fips or compatable
+    --source                expects an argument of type ip
+    --slave-source          expects an argument of type ip
+    --ciphers               expects an argument of type cipher-list
+    --ip                    expects an argument of type ip
+    --slave-ip              expects an argument of type ip
+    --backend-ip            expects an argument of type ip
+    --slave-backend-ip      expects an argument of type ip
+    --backend-port          expects an argument of type port
+
+    Edit the specified SSL termination.
+
+[1;37mlbcli edit-waf - Edit a WAF[0m
+
+[1;37mRequired Arguments:[0m
+
+    --waf                           expects an argument of type existing-waf
+
+[1;37mOptional Arguments:[0m
+
+    --in-anom-score                 expects an argument of type uint
+    --out-anom-score                expects an argument of type uint
+    --req-data                      expects an argument of type bool
+    --resp-data                     expects an argument of type bool
+    --audit                         expects an argument of type bool
+    --dlogin                        expects an argument of type bool
+    --dlogin-mode                   argument should be one of static,
+                                    openid_google or ldap
+    --dlogin-google-clientid        expects an argument of type string
+    --dlogin-google-clientsecret    expects an argument of type string
+    --dlogin-google-redirect-uri    expects an argument of type string
+    --dlogin-google-passphrase      expects an argument of type string
+    --dlogin-google-allowed-domain  expects an argument of type string
+    --rule-engine                   expects an argument of type bool
+    --proxytimeout                  expects an argument of type uint
+    --dlogin-location               expects an argument of type string
+    --dlogin-static-username        expects an argument of type string
+    --dlogin-static-password        expects an argument of type string
+    --ldap-server                   expects an argument of type string
+    --ldap-server-port              expects an argument of type port
+    --search-base                   expects an argument of type string
+    --ldap-attribute                expects an argument of type string
+    --ldap-group                    expects an argument of type string
+    --bind-user                     expects an argument of type string
+    --bind-password                 expects an argument of type string
+    --disable-waf                   expects an argument of type bool
+    --cacheaccel                    expects an argument of type bool
+    --cache-nocache-files           expects an argument of type string
+    --cache-force-cache             expects an argument of type bool
+    --cache-object-size             expects an argument of type uint
+
+    Edit the specified Web Application Firewall.
+
+[1;37mlbcli enable-api - Enable the API endpoint[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action api --function enable
+
+[1;37mRequired Arguments:[0m
+
+    --username  expects an argument of type string defaults to loadbalancer
+    --password  expects an argument of type string defaults to loadbalancer
+
+[1;37mOptional Arguments:[0m
+
+    --apikey    expects an argument of type string
+
+    Enable the API endpoint on the appliance.  The apikey must be the
+    unencoded value of the base64 string passed in the X-LB-APIKEY header of
+    all requests.
+
+[1;37mlbcli enable-floating-ip - Enable Floating IP.[0m
+
+    Make it so that the given floating IP can be made active on this
+    appliance.
+
+[1;37mlbcli fix-floating-ip - Remove and add a floating IP address[0m
+
+[1;37mRequired Arguments:[0m
+
+    --ip  expects an argument of type ip
+
+    Remove and re-add a floating IP in order to ensure it is up after altering
+    the kernel state.
+
+[1;37mlbcli flush-acls - Remove all ACLs for a virtual service[0m
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-l7-vip
+
+    Remove all ACLS for the specified layer 7 virtual service.
+
+[1;37mlbcli flush-static-ips - Remove all static IP addresses[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action address --function flush
+
+[1;37mOptional Arguments:[0m
+
+    --interface  expects an argument of type existing-interface
+
+    Remove all static IP addresses from an appliance.
+
+[1;37mlbcli flush-static-routes - Remove all static routes[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action route --function static --type flush
+
+    Remove all static routes from an appliance.
+
+[1;37mlbcli get-api - Show the properties of the API endpoint[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action api --function get
+
+    Show the username, password and unencoded X-LB_APIKEY header value
+    expected by the API endpoint.
+
+[1;37mlbcli get-default-route - Show the default route[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action route --function default --type get
+
+    Show the default route of the default table for this appliance.
+
+[1;37mlbcli get-dns - Show the DNS servers[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action dns --function get
+
+    Show the Domain Name Servers for this appliance.
+
+[1;37mlbcli get-firewall - Show the firewall settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get firewall
+
+    Show the settings for the firewall for this appliance.
+
+[1;37mlbcli get-graphing - Show the graphing settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get graphing
+
+    Show the graphing settings for this appliance.
+
+[1;37mlbcli get-gslb-reports - Show the GSLB reports[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function get --section reports
+
+[1;37mRequired Arguments:[0m
+
+    --report  argument should be one of get_generic_state or get_ppdns_state
+
+    Show the GSLB reports for this appliance.
+
+[1;37mlbcli get-hostname - Show the hostname[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action hostname --function get
+
+    Show the host and domain name for this appliance.
+
+[1;37mlbcli get-interface-offload - Show the interface offload settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get interface_offload
+
+    Show the interface offload settings for this appliance.
+
+[1;37mlbcli get-management-gateway - Show the management gateway[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get management_gateway
+
+    Show the details of the routing rule that traffic from this appliance's
+    WebUI will return via.
+
+[1;37mlbcli get-mtu - Show the interface MTU settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action mtu --function get
+
+    Show the MTU settings for the interfaces on this appliance.
+
+[1;37mlbcli get-ntp - Show the NTP servers[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get ntp
+
+    Show the Network Time Protocol servers this appliance will use.
+
+[1;37mlbcli get-proxy - Show the HTTP proxy server settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get proxy
+
+    Show the HTTP proxy server the WebUI on this appliance will use.
+
+[1;37mlbcli get-security - Show the security settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get security
+
+    Show the security settings for this appliance.
+
+[1;37mlbcli get-smarthost - Show the email smarthost[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get smarthost
+
+    Show the email smarthost this appliance will use to send emails.
+
+[1;37mlbcli get-snmp - Show the email smarthost[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get snmp
+
+    Show the email smarthost this appliance will use to send emails.
+
+[1;37mlbcli get-syslog - Show the syslog settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get syslog
+
+    Show the syslog settings for this appliance.
+
+[1;37mlbcli get-timedate - Show the current date and time[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get timedate
+
+    Show the current date and time for this appliance.
+
+[1;37mlbcli get-updates - Show the URL of the updates server[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --get updates
+
+    Show the URL of the updates server this appliance will use to fetch online
+    updates.
+
+[1;37mlbcli ha_create - Create a cluster[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli create-ha
+
+[1;37mRequired Arguments:[0m
+
+    --local-ip       expects an argument of type ip
+    --peer-ip        expects an argument of type string
+    --peer-password  expects an argument of type string
+
+    Pair this appliance with another to create a high availability cluster. 
+    This appliance will become the primary server.
+
+[1;37mlbcli halt - Halt a real server[0m
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-vip
+    --rip  expects an argument of type existing-rip
+
+    Close all connections to the specified real server and forbid and new
+    connections.
+
+[1;37mlbcli haproxy-clear-stick - Clear all HAProxy stick tables[0m
+
+    Clear all HAProxy stick tables.
+
+[1;37mlbcli install-licence - Install a licence[0m
+
+[1;37mRequired Arguments:[0m
+
+    --key  expects an argument of type string
+
+    Install a key to licence this appliance.
+
+[1;37mlbcli list-acls - List ACL rules[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action acl --function list
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-l7-vip
+
+    List all ACL rules for the specified layer 7 virtual service.
+
+[1;37mlbcli list-certificates - List SSL certificates[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action termination --function list --type certificate
+
+    List all SSL certificates on this cluster.
+
+[1;37mlbcli list-floating-ips - List floating IP addresses[0m
+
+[1;37mAlternate invocations:[0m
+
     lbcli --action list --function floatingip
 
-List XML as JSON        
+    List all floating IPs on this cluster.
+
+[1;37mlbcli list-gslb-globalnames - List global names[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function list --section globalnames
+
+    List all GSLB global names.
+
+[1;37mlbcli list-gslb-members - List members[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function list --section members
+
+    List all GSLB members.
+
+[1;37mlbcli list-gslb-pools - List pools[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function list --section pools
+
+    List all GSLB pools.
+
+[1;37mlbcli list-gslb-topologies - List topologies[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action gslb --function list --section topologies
+
+    List all GSLB topologies.
+
+[1;37mlbcli list-headers - List header rules[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action headers --function list
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-l7-vip
+
+    List all header rules for the specified layer 7 virtual service.
+
+[1;37mlbcli list-healthchecks - List health checks[0m
+
+    List existing health checks on the cluster.
+
+[1;37mlbcli list-pbr - List PBR rules[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action pbr --function get
+    lbcli get-pbr
+
+[1;37mOptional Arguments:[0m
+
+    --ip       expects an argument of type ip
+    --gateway  expects an argument of type ip
+
+    List Policy Based Routing rules for this appliance.
+
+[1;37mlbcli list-static-ips - List static IP addresses[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action address --function get
+
+[1;37mRequired Arguments:[0m
+
+    --interface  expects an argument of type existing-interface
+
+    List static IPs configured on the specified interface.
+
+[1;37mlbcli list-static-routes - List static routes[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action route --function static --type get
+
+    List static routes configured on this appliance.
+
+[1;37mlbcli list-waf - List WAFs[0m
+
+    List Web Apoplication Firewalls configured on this appliance.
+
+[1;37mlbcli lockdown - Lockdown access to the WebUI[0m
+
+[1;37mRequired Arguments:[0m
+
+    --enabled  expects an argument of type bool
+
+[1;37mOptional Arguments:[0m
+
+    --network  expects an argument of type ip-and-cidr
+
+    Lockdown the WebUI on this appliance so that it only responds to clients
+    on the specified subnet.
+
+[1;37mlbcli nodestatus - Report the node statuses[0m
+
+    Report the status of the nodes in this cluster as this appliance
+    understands them.
+
+[1;37mlbcli online - Bring a real server online[0m
+
+[1;37mRequired Arguments:[0m
+
+    --vip  expects an argument of type existing-vip
+    --rip  expects an argument of type existing-rip
+
+    Bring a real server that is halted or drained back online by allowing it
+    to receive connections once more.
+
+[1;37mlbcli reboot - Reboot appliance[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action power --function restart
+
+    Reboot this appliance.
+
+[1;37mlbcli regenerate-default-certificate - Regenerate default certificate[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action termination --function regenerate_local --type certificate
+
+    Regenerate the default self-signed certificate used by the webui and
+    SSL-terminations.
+
+[1;37mlbcli reload-apache - Reload WebUI[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli reload-webui
+
+    Reload the WebUI service on this appliance.
+
+[1;37mlbcli reload-gslb - Reload GSLB[0m
+
+    Reload the GSLB service on this appliance.
+
+[1;37mlbcli reload-haproxy - Reload HAProxy[0m
+
+    Reload the HAProxy service on this appliance.
+
+[1;37mlbcli reload-heartbeat - Reload Heartbeat[0m
+
+    Reload the Heartbeat service on this appliance.
+
+[1;37mlbcli reload-ldirectord - Reload LDirectord[0m
+
+    Reload the LDirectord service on this appliance.
+
+[1;37mlbcli reload-stunnel - Reload STunnel[0m
+
+    Reload the STunnel service on this appliance.
+
+[1;37mlbcli reload-syslog - Reload Syslog[0m
+
+    Reload the Syslog service on this appliance.
+
+[1;37mlbcli reload-waf - Reload WAF[0m
+
+    Reload the WAF service on this appliance.
+
+[1;37mlbcli reset-cluster-config - Break a cluster[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action reset --function cluster
+
+    Break a high-availability pair.
+
+[1;37mlbcli restart-autoscaling - Restart Autoscaled[0m
+
+    Reload the Autoscaled service on this appliance.
+
+[1;37mlbcli restart-azha - Restart AZHA[0m
+
+    Reload the AZHA service on this appliance.
+
+[1;37mlbcli restart-collectd - Restart Collectd[0m
+
+    Reload the Collectd service on this appliance.
+
+[1;37mlbcli restart-firewall - Restart Firewall[0m
+
+    Reload the Firewall service on this appliance.
+
+[1;37mlbcli restart-haproxy - Restart HAProxy[0m
+
+    Reload the HAProxy service on this appliance.
+
+[1;37mlbcli restart-heartbeat - Restart Heartbeat[0m
+
+    Reload the Heartbeat service on this appliance.
+
+[1;37mlbcli restart-ldirectord - Restart LDirectord[0m
+
+    Reload the LDirectord service on this appliance.
+
+[1;37mlbcli restart-pound - Restart Pound[0m
+
+    Reload the Pound service on this appliance.
+
+[1;37mlbcli restart-snmp - Restart SNMP[0m
+
+    Reload the SNMP service on this appliance.
+
+[1;37mlbcli restart-stunnel - Restart STunnel[0m
+
+    Reload the STunnel service on this appliance.
+
+[1;37mlbcli restart-syslog - Restart Syslog[0m
+
+    Reload the Syslog service on this appliance.
+
+[1;37mlbcli restart-waf - Restart WAF[0m
+
+    Reload the WAF service on this appliance.
+
+[1;37mlbcli restore - Restore factory defaults[0m
+
+[1;37mRequired Arguments:[0m
+
+    --yes-i-am-sure  expects an argument of type bool
+
+    Restore this appliance to factory defaults.
+
+[1;37mlbcli set-default-route - Set default route[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action route --function default --type set
+
+[1;37mRequired Arguments:[0m
+
+    --interface  expects an argument of type existing-interface-or-auto
+                 defaults to auto
+    --gateway    expects an argument of type ip
+
+    Set the default gateway for this appliance.
+
+[1;37mlbcli set-dns - Set DNS servers[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action dns --function set
+
+[1;37mOptional Arguments:[0m
+
+    --dns0  expects an argument of type ip-or-empty
+    --dns1  expects an argument of type ip-or-empty
+    --dns2  expects an argument of type ip-or-empty
+
+    Set the Domain Name Servers for this appliance.
+
+[1;37mlbcli set-firewall - Set firewall properties[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set firewall
+
+[1;37mRequired Arguments:[0m
+
+    --conntrack-size  expects an argument of type uint
+
+    Set the properties for the firewall for this appliance.
+
+[1;37mlbcli set-graphing - Set graphing properties[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set graphing
+
+[1;37mOptional Arguments:[0m
+
+    --layer4      expects an argument of type bool
+    --layer7      expects an argument of type bool
+    --interfaces  expects an argument of type bool
+    --interfaces  expects an argument of type bool
+    --load        expects an argument of type bool
+    --memory      expects an argument of type bool
+    --disk        expects an argument of type bool
+    --interval    expects an argument of type uint
+    --timeout     expects an argument of type uint
+
+    Set the graphing properties for this appliance.
+
+[1;37mlbcli set-hostname - Set hostname[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action hostname --function set
+
+[1;37mRequired Arguments:[0m
+
+    --hostname  expects an argument of type string
+    --domain    expects an argument of type string defaults to localdomain
+
+    Set the host and domain name for this appliance.
+
+[1;37mlbcli set-interface-offload - Set interface offload[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set interface_offload
+
+[1;37mRequired Arguments:[0m
+
+    --hardware-offload  expects an argument of type bool
+
+    Enable or disable TCP offload for this appliance.
+
+[1;37mlbcli set-management-gateway - Set the management gateway[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set management_gateway
+
+[1;37mRequired Arguments:[0m
+
+    --iface-ip  expects an argument of type existing-static-ip
+    --gateway   expects an argument of type ip
+
+    Set the routing rule which traffic from the WeBUI will follow for this
+    appliance.
+
+[1;37mlbcli set-mtu - Set the MTU[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action mtu --function set
+
+[1;37mRequired Arguments:[0m
+
+    --interface  expects an argument of type existing-interface
+    --mtu        expects an argument of type mtu
+
+    Set the MTU for the specified interface.
+
+[1;37mlbcli set-ntp - Set NTP server[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set ntp
+
+    Set the Network Time Protocol servers used by this appliance.
+
+[1;37mlbcli set-proxy - Set HTTP proxy[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set proxy
+
+[1;37mOptional Arguments:[0m
+
+    --ip        expects an argument of type hostname-or-ip
+    --port      expects an argument of type port
+    --username  expects an argument of type string
+    --password  expects an argument of type string
+
+    Set the HTTP proxy used by the WebUI of this appliance.
+
+[1;37mlbcli set-security - Set security settings[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set security
+
+[1;37mOptional Arguments:[0m
+
+    --security-mode  argument should be one of custom, secure or secure-perm
+    --rootaccess     expects an argument of type bool
+    --sshpassword    expects an argument of type bool
+    --httpsonly      expects an argument of type bool
+    --httpsport      expects an argument of type bool
+    --certificate    expects an argument of type existing-certificate
+    --httpsciphers   expects an argument of type cipher-list
+
+    Set the security settings for this appliance.
+
+[1;37mlbcli set-smarthost - Set the email smarthost[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set smarthost
+
+[1;37mOptional Arguments:[0m
+
+    --smtp-relay  expects an argument of type string
+
+    Set the email smarthost this appliance will use to send emails.
+
+[1;37mlbcli set-snmp - Set SNMP properties[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set snmp
+
+[1;37mOptional Arguments:[0m
+
+    --community      expects an argument of type string
+    --location       expects an argument of type string
+    --contact        expects an argument of type string
+    --user           expects an argument of type string
+    --auth-method    expects an argument of type string
+    --auth           expects an argument of type string
+    --priv-method    expects an argument of type string
+    --priv           expects an argument of type string
+    --snmpv3-enable  expects an argument of type string
+    --snmpv2-enable  expects an argument of type string
+
+    Set the properties of the SNMP service on this appliance.
+
+[1;37mlbcli set-syslog - Set syslog properties[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set syslog
+
+[1;37mOptional Arguments:[0m
+
+    --interval     expects an argument of type uint
+    --burst        expects an argument of type uint
+    --destination  expects an argument of type string
+    --ip           expects an argument of type ip
+    --port         expects an argument of type port
+    --protocol     argument should be one of tcp or udp
+    --template     expects an argument of type string
+
+    Set the properties of the syslog service on this appliance.
+
+[1;37mlbcli set-timedate - Set time and date[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set timedate
+
+[1;37mRequired Arguments:[0m
+
+    --year    expects an argument of type uint
+    --month   expects an argument of type month
+    --day     expects an argument of type day
+    --hour    expects an argument of type hour
+    --minute  expects an argument of type minute
+
+    Set the time and date of this appliance.
+
+[1;37mlbcli set-updates - Enable or disable update check[0m
+
+[1;37mAlternate invocations:[0m
+
+    lbcli --action local-configuration --set updates
+
+[1;37mOptional Arguments:[0m
+
+    --auto-check-for-updates  expects an argument of type bool
+    --update-server           expects an argument of type string
+
+    Enable or disable the update check on this appliance.
+
+[1;37mlbcli show-full-config - Show configuration.[0m
+
+[1;37mAlternate invocations:[0m
+
     lbcli --action list --function dumpconfig
 
-List advanced settings  
-    lbcli --action list --function advanced --layer 4:7
+    Show configuration for this appliance.
 
-List VIP for Layer4/7   
-    lbcli --action list --function virtual --layer 4:7 \
-          --vip vipname --rip ripname
+[1;37mlbcli show-layer4-advanced - Show configuration for LDirectord.[0m
 
-HA options
+[1;37mAlternate invocations:[0m
 
-Create HA               
-    lbcli --action ha_create --local_ip (this ip) \
-          --peer_ip ip.to.be.slave --peer_password loadbalancer
+    lbcli --action list --function advanced --layer 4
 
-To create a HA Pair, ensure both appliances are Master and the peer node 
-has no configuration, no VIP's no Floating IP's and no SSL Terminations    
-otherwise it will fail. Once you have created a HA Pair the command will 
-fail if run again as the peer role will be incorrect...
+    Show configuration for LDirectord for the cluster.
 
-Local Setup of Hostname, DNS, Networking, gateways and routes. 
-Use get and set to define the as below.
+[1;37mlbcli show-layer4-services - Show configuration for Layer 4 virtual services.[0m
 
-Get and Set Host and Domainname 
-    lbcli --action hostname --function get
-    
-    lbcli --action hostname --function set \
-          --hostname (hostname) --domain (domain_name)
+[1;37mAlternate invocations:[0m
 
-Get and Set DNS Servers         
-    lbcli --action dns --function get    
-    
-    lbcli --action dns --function set \
-          --dns0 1.1.1.1 --dns1 8.8.4.4 --dns2 172.31.31.10
+    lbcli --action list --function virtual --layer 4
 
-To clear a DNS Server specify which is to be cleared with --dnsX ""
-note if dns0 and 1 are empty dns2 will show as dns0 in the WUI and
-general configuration
+    Show the configuration for Layer 4 virtual services on this cluster.
 
-Get and Set Interface MTU
-    lbcli --action mtu --function get 
-    
-    lbcli --action mtu --function set --interface eth0 --mtu 1500 
+[1;37mlbcli show-layer7-advanced - Show configuration for HAProxy.[0m
 
-When changing the MTU, ensure the upstream device has a matching or larger MTU.
+[1;37mAlternate invocations:[0m
 
-Get and Set default gateways    
-    lbcli --action route --function default --type get
-    
-    lbcli --action route --function default --type set \
-          --gateway (192.168.100.1 or 2001:470:68a4::1) \
-          --interface (if not set 'Auto' is used)
-    
-Get and set static routes       
-    lbcli --action route --function static --type get    
-    
-    lbcli --action route --function static --type add \
-          --network (192.168.100.100/18 or 2001:470:68a4::/48) \
-          --gateway (Gateway address to get to the network) ***
+    lbcli --action list --function advanced --layer 7
 
-    lbcli --action route --function static --type del \
-          --network (192.168.100.100/18 or 2001:470:68a4::/48) \
-          --gateway (192.168.100.1 or 2001:470:68a4::1) ***
+    Show configuration for HAProxy for the cluster.
 
-    lbcli --action route --function routes --type flush 
+[1;37mlbcli show-layer7-services - Show configuration for Layer 7 virtual services.[0m
 
-Flushing routes will remove all static routes.
+[1;37mAlternate invocations:[0m
 
-Add and remove IP Addresses      
-    lbcli --action address --function get|add|del|*flush* \
-          --interface (Interface) \
-          --address (192.168.100.100/18 or 2001:470:68a4::10/48) \
-          --cidr (0-32 ipv4) or (64-112 ipv6)
+    lbcli --action list --function virtual --layer 7
 
-    get = Get addresses
-    add = Set a new address
-    del = Deletes the address specified
-    flush = flush an interface of all IP Addresses  
+    Show the configuration for Layer 7 virtual services on this cluster.
 
-Note that if --address is a simple IP without /CIDR then you 
-need to define the --cidr. IE --cidr 24 for 255.255.255.0 netmask
+[1;37mlbcli shutdown - Shutdown appliance.[0m
 
-If you need assistance with netmask to cidr conversions 
-please use the command below
-    
-    lbcli --help cidr
+[1;37mAlternate invocations:[0m
 
-Policy based VIP Routing
-     lbcli --action pbr --function get:set:delete --ip (VIP IP address) --gateway 1.2.3.4
+    lbcli --action power --function shutdown
 
-     --ip and --gateway are only required for --function set and delete 
-     if you define them for get it will return that policy if both --ip and --gateway match
-     If no match an empty set or policies are returned. 
+    Shutdown this appliance.
 
-     You can only use IPv4 Floating IP's for the --ip and use of IPv6 or any other address 
-     will fail. 
+[1;37mlbcli status-gslb - Show GSLB status.[0m
 
-This allows you to define an alterninate gateway for your VIP's and it used to resolve 
-Policy Based Routing issues. 
+    Show the status of the GSLB service for this appliance.
 
+[1;37mlbcli support-download - Create a techincal support download.[0m
 
+    Create a techincal support download for this appliance.
 
-GSLB: Added v8.5.0  
+[1;37mlbcli uptime - Get uptime.[0m
 
-    lbcli --action gslb --section (globalnames|members|pools|topologies) --function (add|edit|delete|list)
+    Get the uptime for this appliance.
 
-    (globalnames)  --name <example> --hostname  <fully qualified domain name> --ttl <3600>
-
-    (members) --name --ip <dns IP to publish> --monitor_ip <internal ip to monitor> --weight <0-10> --add_member name --add_member name
-    // only valid members are accepted and not more then one members which is the same per pool entry. two pools can share members
-    // members may share the backend but this will get confusing so please and keep your members low, unless you need another
-    // healthcheck then redefine the same IP for a Name in an Endpoint but be aware health checks may take their toll on the network.
-    // keep health check responses minimal  
-
-    (pools)  --name <poolname> --monitor <http|tcp|forced|external> --monitor_interval <5> --monitor_timeout <5000> \
-             --monitor_retries <3> --monitor_use_ssl <yes:no> --monitor_status <up:down> --monitor_hostname <fully qualified domain name / SNI Hostname> \
-             --monitor_port <80> --monitor_expected_codes <200,201 important - no spaces>  --monitor_send_string </example.php?status=up> \
-             --lb_method <wrr|twrr|fogroup> --fallback <any|refuse> --max_addresses_returned <1> --add_globalname <each globalname> \
-             --add_globalname <another globalname> --delete_globalname <delete globalname>  \
-             --add_member <first members> --delete_member <delete members> 
-
-            --monitor http --monitor_use_ssl <yes:no or true:false> --monitor_hostname gslb.example.com \
-                           --monitor_url_path / --monitor_port 80 --monitor_expected_codes 200,201,301 (only 3 codes expected)
-
-            --monitor tcp --monitor_port 80 --monitor_send_string check --monitor_match_response ?
-
-            --monitor forced --monitor_status <up:down>
-
-            --monitor external --monitor_script script.sh --monitor_parameters arg --monitor_result
-
-            --monitor external_dynamic_weight --monitor_port ? --monitor_parameters ?? 
-
-             To remove globalname you should use --delete_globalname and to remove members use --delete_member
-            
-             You should only use the --delete_globalname or --delete_member when editing your pools
-
-
-    (topologies) --name <Your AZ, DC, GEOLocaton> --add_ips <IP/CIDR> --add_ips <IP/CIDR> --add_ips <IP/CIDR> \
-                 --add_ips <Add as many IP CIDR ranges as needed> --delete_ips <IP/CIDR to remove>
-
-	(reports)
-
-	lbcli --action gslb --section reports --function get --report get_ppdns_state | get_generic_state
-
-
-
-Configure LBAPI from LBCLI
-    lbcli --action api --function (enable:disable|get) \
-          --username (username) \
-          --password (password) \
-          --apikey (apikey)
-
-Configure Power Control from LBCLI
-    lbcli --action power --function (shutdown|restart)
-
-This allows you to shutdown or restart the loadbalancer.org appliance
-be aware that shutdown will make the appliance unresponsive and will 
-require a visit to a hardware appliance to turn it back on.
-   
-
-When enabling the API --username and --password should be defined 
-optionally set --apikey or a random 32 char key will be returned. 
-
-If you wish to show the API credentials then you need not specify 
---username --password or --apikey
-
-All lbcli calls can have '--method api' appended to force return 
-output JSON, many regular calls also now return JSON
-
-For individual help and advice on each action please type
-
-lbcli --help (action lbcli help about) 
-
-*   Informational 
-**  Not tested or complete
-*** Warning`
+[?r
