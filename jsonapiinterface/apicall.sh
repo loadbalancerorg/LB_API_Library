@@ -14,7 +14,7 @@ while true; do
 done
 if [ $loadbalancer != "" ] || [ $username != "" ] || [ $password != "" ] || [ $json != "" ] || [ $apikey != "" ]; then
 	curl -u ${username}:${password} -X POST  \
-	     --header "X_LB_APIKEY: ${apikey}" \
+	     --header "X-LB-APIKEY: ${apikey}" \
 	     --header Content-Type:application/json \
 	     -d @${json} https://${loadbalancer}:9443/api/v2/ -k
 else

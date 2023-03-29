@@ -9,7 +9,7 @@ $apikey = [System.Convert]::ToBase64String($apikeybytes)
 $jsonfile = Get-Content $json  -Raw
 $headers = @{}
 $headers.Add( "Authorization", $basicAuth )
-$headers.Add( "X_LB_APIKEY", $apikey )
+$headers.Add( "X-LB-APIKEY", $apikey )
 $uri="https://${ip}:9443/api/v2/"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 [System.Net.ServicePointManager]::CertificatePolicy = New-Object
