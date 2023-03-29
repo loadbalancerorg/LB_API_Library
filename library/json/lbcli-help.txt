@@ -1,0 +1,608 @@
+
+[1;37mLBCLI Usage: Help options[0m
+
+
+
+    Overview Actions Usage Examples:
+
+Drain RIP:              
+    lbcli --action drain --vip (VIP Name) --rip (RIP Name) --services all 
+Halt RIP:               
+    lbcli --action halt --vip (VIP Name) --rip (RIP Name) --services all 
+Online RIP:             
+    lbcli --action online --vip (VIP Name) --rip (RIP Name) --services all
+
+    --services all is optional to do the same --action over all VIP's.
+
+    This will only work for the layer the defined VIP is in, it will not online 
+    halt or drain RIP's from another layer.
+
+    IE, the first VIP is a Layer7 VIP then all the real servers in Layer7 with 
+    the same --rip label will have the same action applied. 
+    
+    
+VIP Actions Usage Examples:
+
+Add Layer 4 VIP:        
+    lbcli --action add-vip --layer 4 --vip (VIP Name) \
+          --ip (VIP IP Address) \
+          --ports (ports) \
+          --forwarding (gate|masq|ipip|snat) \
+          --protocol (tcp|udp|tcpudp|ops|fwm) \
+          --slave_ip (1.2.3.4) # Slave IP is for Azure only
+
+Add Layer 7 VIP:        
+    lbcli --action add-vip --layer 7 --vip (VIP Name) \
+          --ip (VIP IP Address) \
+          --ports (ports) \
+          --mode (http|tcp) \
+          --fallback_ip (IP Address) \
+          --fallback_port (port) \
+          --service_type (waf_frontend) \
+          --slave_ip (1.2.3.4) \
+          --encrypt_all_backends (on:off) 
+
+Delete VIP:             
+    lbcli --action delete-vip --vip (VIP Name)
+
+    Warning : When using the edit VIP be aware you can break your configuration. 
+    Take care to use the right combination of options. All possible options are shown for Layer4 and Layer7
+
+Edit VIP:               
+    lbcli --action edit-vip --vip (VIP_NAME_TO_EDIT)
+
+    Layer4:    
+          --ip               (IP Address of the VIP)
+          --ports            (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
+          --protocol         (tcp:udp:ops:fwm) # We do not support manual firewall marks where IP = FWM Number as you need to manually add the firewall rules
+          --forwarding       (gate:masq:ipip:snat) Gate = L4 DR, masq=L4 NAT, ipip=TUN Mode, snat=SNAT Mode
+          --granularity      (255.255.255.255) This is the subnet or single ip range for persistence
+          --fallback_ip      (127.0.0.1) This is the fallback server IP Address, It may be an external IP Address
+          --fallback_port    (9081) This is the fallback server port, it may be the port of an external web server.
+          --fallback_local   (on:off) MASQ Fallback. Allows fallback server port to be different to that of the real server.
+          --persistent       (on:off) Are we a persistent Layer4 VIP , this is simply on or off
+          --persist_time     (300) The persistent time in seconds by default is 300
+          --scheduler        (wlc:wrr:dh) wlc=Weighted Least Connection, wrr=Weighted Round Robin, dh=Destination Hash
+          --feedback         (agent:http:none) agent=Feedback Agent, http=HTTP, none=No Feedback
+          --email            (recpt@email.com) Your email address to receive email alerts
+          --email_from       (sender@email.com) Sending email address of email alerts
+          --check_service    (http:https:http_proxy:imap:imaps:pop:pops:ldap:smtp:nntp:dns:mysql:sip:simpletcp:radius:none)
+                             If check type = Negotiate then Layer4 knows about various service
+          --check_vhost      (host header) When using a Negotiate check we can enable a host header to check a known site status used for HTTP,HTTPS
+          --check_database   (db) Database to check if check_service=mysql
+          --check_login      (username) used when check_service is MySQL,FTP,IMAP,IMAPS,POP,POPS,LDAP,SIP
+          --check_password   (password) This is the password used with the check_login when required, FTP,IMAP,IMAPS,POP,POPS,LDAP,MYSQL,SIP
+          --check_type       (negotiate|connect|ping|external|off|on|5|10) This is the check type, Negotiate, Connect to port, External script,
+                             no checks, always off, No checks, always on, 5 Connects, 1 Negotiate, 10 Connects, 1 Negotiate
+          --check_port       (80) Port to check when using Negotiate check ,
+          --check_request    (check.txt) used for check_service= http,https,
+          --check_response   (OK) Response expected to the check_request
+          --check_secret     (secret) This is used onmly if check_service = RADIUS
+          --check_command    (external_script.sh) This is used when check_type=external
+          --autoscale_group  (YOUR AUTO SCALE GROUP NAME)  if in AWS the name of the auto scale group you have defined.
+ 
+    Layer7:  
+          --ip                     (IP Address of VIP)
+          --ports                  (Ports can be 80 80:81 or 800-900 or 80:90-100:3443 as a mix of port:separated:values and also port-ranges values)
+          --mode                   (http:tcp) Mode of the Layer7 VIP it is either http or tcp, tcp is an alias of other_tcp and either can be specified
+          --persistence            (http:appsession:sslsesid:rdp-session:rdp-cookie:ip:http_ip:xff:none:fallback_persist) 
+                                   Note some persistent modes are only available in tcp mode: sslsesid, appsession, rdp-session, ip
+                                   available in http mode: http, appsession, rdp-cookie, ip , http_ip, xff
+
+                                   When using '--persistence fallback_persist' you MUST set --fallback_ip and --fallback_port as without these it will fail. 
+
+          --cookiename             (SERVERID)  only available when persistence is http,http_ip
+          --fallback_ip            (127.0.0.1) Fallback Server IP Address, this is either the internal NGINX fallback or external or VIP of fallback server
+          --fallback_port          (9081)      Fallback Port, 9081 by default of that of the external fallback server ports
+          --persist_time           (30) Persistence timeout available when persistence=appsession,sslsesid,rdp-cookie,ip,http_ip,xff
+          --persist_table_size     (10240) Persistence table size available when persistence=appsession,sslsesid,rdp-cookie,ip,http_ip,xff
+          --maxconn                (40000) max conns allowed to the VIP
+          --scheduler              (roundrobin:leastconn) Weighted Round Robin or Weighted Least Connections
+          --check_port             (Port of Service) Check port is available when check is negotiate_http,negotiate_https,connect,mysql
+          --check_request          (check.txt) name of file to request
+          --check_receive          (OK) response expected from check request
+          --check_host             (VHOST) Check host header for checking a virtual host with host header
+          --check_username         (mysql) Healthcheck username, only available with check type=mysql
+          --appsession_cookie      (JSESSIONID:PHPSESSIONID:ETC) The application session ID provided by your real server.
+          --forward_for            (on:off) Insert X-Forward-For only available in http mode.
+          --http_pipeline          (http_keep_alive|http_close|http_server_close|http_force_close) This is only available in mode=http
+          --http_pretend_keepalive (on:off) Work around broken connection: close  This is only available in mode=http
+          --stunneltproxy          (on:off) Only select on if behind an stunnel ssl termination and where stunnel proxy is also enabled on the SSL Termination
+          --feedback_method        (agent:none) The feedback method is either the feedback agent or none. This is available in mode http or tcp
+          --fallback_persist       (on:off) Is the fallback server persistent on or off
+          --feedback_port          (3333) Port used for the feedback agent by befault is 3333 only when method=agent
+          --check_type             (negotiate_http:negotiate_http_head:negotiate_https:negotiate_https_head:connect:external:mysql:none) 
+                                   Type of health check to use negotiate_https or negotiate_httpd_head are only available when backend is encrypted
+          --external_check_script  (scriptname.sh) This is the filename of external check scripts 
+                                    in /var/lib/loadbalancer.org/check/ available when check_type=external
+          --tcp_keep_alive 
+          --force_to_https         (on:off) Force connection to https, if used then no other options need be configured and no real servers
+                                   need be present in the VIP. take care when using stunnel_proxy=on
+          --timeout                (on:off) Enable or disable client / real server timeout
+          --timeout_client         (12h) Client Timeout by default 12 hours
+          --timeout_server         (12h) Real Server Timeout by default 12 hours
+          --redirect_code          (301:302:303:307:308) Only used if force_to_https=on
+                                   301 (Moved Permanently), 302 (Found), 303 (See Other), 307 (Temporary Redirect), 308 (Permanent Redirect)
+          --no_write               (on:off) This is used to enable manual configuration of the VIP.
+                                   not suggested for full lbcli use as you can not edit the manual configuration unless you upload it manually
+          --waf_label              (WAF_VIP_NAME) When creating a WAF the WAF Service will add this to the VIP,
+                                   Care needs to be taken when changing this as the WAF also needs updating.
+          --clear_stick_drain      (on:off) Do you want to clear the stick table on drain of the RIP in the VIP
+          --compression            (on:off) Do we enable compression on the VIP, only available in mode=http
+          --autoscale_group        (YOUR AUTOSCALE GROUP NAME)  if in AWS the name of the autoscale group you have defined.
+          --cookie_maxidle         (30m) Cookie Max Idle Duration.
+          --cookie_maxlife         (12h) Cookie Max Life Duration.
+          --source_address         (192.168.2.21) IP Address used for health check source IP
+          --backend_encryption     (on:off) Only available on mode=http. Do we want to re-encrypt to the real server?
+          --enable_hsts            (on:off) Only available in mode=http
+          --hsts_month             (6) Months the HSTS is valid 3-24 months, Only available in mode=http
+          --xff_ip_pos             (-1) Move the XFF header back one in the list to show client IP in correct place. This is only available when persistence=xff
+          --invalid_http           (on:off) Accept invalid http requests. this is only available in mode=http
+          --send_proxy             (none:v1:v2:v2_ssl:v2_ssn_cn)  Send Proxy Protocol
+                                   None, Send Proxy V1, Send Proxy V2, Send Proxy V2 SSL, Send Proxy V2 SSL CN
+          --as_port                (1234) Autoscale Port on the real servers you have defined in AWS
+          --http_request           (on:off) Default is on to enable Slowlaris protection. You would usually not need to disable this unless the headers are delayed more than 5 seconds
+          --stunnel_source         (1.2.3.4) Source IP of Stunnel VIP
+          --proxy_bind             (name of Layer7 VIP)  Name of the Layer7 VIP to bind to.
+          --slave_ip               (Azure Only) 
+          --tunneltimeout          Value in seconds for WebSockets
+          --redispatch             (on:off) turn redispatch on or off
+          --fallback_encrypt       (on:off) Encrypt connection to the fallback server if it is a TLS Connection
+          --http_reuse_connection  (on:off) It is possible to reuse idle connections to serve requests from the same session which can be beneficial in terms of performance. 
+                                   It is important to note that the first request of a session is always sent over its own connection, and only subsequent requests may be dispatched 
+                                   over other existing connections.
+          --tproxy                 (on:off) Turn tproxy on and off on a VIP leve. 
+
+    lbcli --action clone-vip --vip (VIP to Clone) --clone (New Cloned VIP)  --ip (new IP Address) |or| --ports (new ports)
+
+          Optional combination of --ip --ports to change IP Addresss or pots of the cloned VIP
+          If you use any option in edit-vip the cloned VIP will also be updated to reflect the syntax supplied.
+
+          example lbcli --action clone-vip --vip source --vip dest --ip 192.168.100.120 --ports 443 --persistence ip --mode tcp
+
+          This will set the persistence to IP and mode to tcp, it may have been mode http in the source VIP. 
+ 
+RIP Actions Usage:
+
+Add Layer 4 RIP:        
+    lbcli --action add-rip --vip (VIP Name)  --rip (RIP Name) \
+          --ip (RIP IP Address) \
+          --weight (Weight value) \
+          --port (Port Value) \
+          --minconns (minconns) \
+          --maxconns (maxconns)
+
+Add Layer 7 RIP:        
+    lbcli --action add-rip --vip (VIP Name) --rip (RIP Name) \
+          --ip (RIP IP Address) \
+          --weight (Weight value) \
+          --port (Port value) \
+          --minconns (minconns) \# Optional
+          --maxconns (maxconns) \# Optional 
+          --encrypted (on|off)    # Optional 
+
+Delete RIP:             
+    lbcli --action delete-rip --vip (VIP Name) --rip (RIP Name)
+
+Edit RIP:               
+    lbcli --action edit-rip --vip (VIP Name) --rip (RIP Name) \
+          --ip \
+          --port \
+          --weight \
+          --minconns \ # Optional 
+          --maxconns    # Optional 
+          OPTIONAL Layer7: --encrypted
+    
+WAF Action Usage:
+
+Add WAF:                
+    lbcli --action add-waf --vip (VIP Name) --waf (WAF Name) 
+
+Edit WAF:              
+    lbcli --action edit-waf --waf (WAF Name) \
+          --in_anom_score (1:100) \
+          --out_anom_score (1:100) \
+          --req_data (on:off) \
+          --resp_data (on:off) \
+          --audit (on:off) \
+          --proxytimeout (60) \
+          --dlogin (on:off) \
+          --dlogin_mode (static:openid_google) \
+          --dlogin_location (/:/dir:/file.html) \
+          --dlogin_static_username (username) \
+          --dlogin_static_password (password) \
+          --dlogin_google_clientid (Google API Clien ID) \
+          --dlogin_google_clientsecret (secret) \
+          --dlogin_google_redirect_uri (redirect uri) \
+          --dlogin_google_passphrase (passphrase) \
+          --dlogin_google_allowed_domain (example.com email domain) \
+          --rule_engine (on:off) \
+          --disable_waf (on|off) \
+          --cacheaccel (on|off) \
+          --cache_nocache_files (file or regex) \
+          --cache_force_cache (on|off) \
+          --cache_object_size (5120)
+
+
+Delete WAF:             
+    lbcli --action delete-waf --vip (VIP Name) --waf (WAF Name)
+
+
+Floating IP Action Usage:
+
+Add Floating IP:       
+    lbcli --action add-floating-ip --ip (IP Address)
+
+Remove Floating IP:     
+    lbcli --action delete-floating-ip --ip (IP Address)
+
+Fix Floating IP:        
+    lbcli --action fix-floating-ip --ip (IP Address)
+
+    fix-floating-ip removes and re-adds the floating IP, care is needed if the IP is up on the 
+    wrong interface and it has other base IP addresses within the same subnet. we will get confused. 
+    First ip ad del x.x.x.x/cidr dev ethx to remove all IP's on the wrong interface
+    then run lbcli --action fix-floating-ip --ip ip.add.re.ss
+
+  
+Services Actions Usage: 
+    lbcli --action restart-ldirectord 
+    lbcli --action restart-haproxy         
+    lbcli --action restart-heartbeat             
+    lbcli --action restart-pound           
+    lbcli --action restart-stunnel      
+    lbcli --action restart-collectd         
+    lbcli --action restart-firewall          
+    lbcli --action restart-syslog           
+    lbcli --action restart-snmp               
+    lbcli --action restart-waf    
+    lbcli --action restart-autoscaling   
+    lbcli --action restart-azha
+
+    lbcli --action reload-apache       
+    lbcli --action reload-ldirectord          
+    lbcli --action reload-haproxy                
+    lbcli --action reload-waf
+    lbcli --action reload-syslog           
+    lbcli --action reload-stunnel          
+    lbcli --action reload-heartbeat 
+    lbcli --action reload-gslb
+    lbcli --action status-gslb
+
+
+    lbcli --action haproxy-clear-stick
+
+SSL Termination
+
+List Certificates:      
+    lbcli --action termination --type certificate --function list
+
+Create CSR:             
+    lbcli --action termination --type certificate --function csr \
+          --csrname (CSRNAME) \
+          --city (CITY) \
+          --province (COUNTY) \
+          --country (ISO COUNTRY CODE : GB for uk) \
+          --organisation (ORG) 
+          --unit (UNIT) 
+          --domain (example.com) 
+          --email (ssl@example.com) 
+          --csrsize (2048:4096) 
+          --signalgorithm sha256 \
+          --days (365)
+
+Upload SSL PEM/PFX:  Please refer to the blog below
+    http://www.loadbalancer.org/blog/how-do-i-automate-load-balancer-deployments/
+   
+
+Add Termination:        
+    lbcli --action termination --type stunnel --function add  --vip (VIPNAME) \
+          --ip (IP ADDRESS) \
+          --port (PORT) \
+          --backend_ip (BACKEND IP) \
+          --slave_ip (Azure Only) \
+          --backend_port (BACKEND PORT) \
+          --sslcert (SSLCERTNAME) \
+          --disabletlsv1_1  (on:off) \
+          --disabletlsv1_2 (on:off) \
+          --disabletlsv1_3 (on:off) \
+          --sslmode (high|fips|compatable|custom) \
+          --associated_to (Layer7 VIP to associate to, likely the same as --proxy_bind)
+          # --haproxy_ssl_link (This is a combination of VIP_Name^VIP^PORT or custom) # DEPRECIATED
+           
+
+Edit Termintaion:       
+    lbcli --action termination --type stunnel --function edit  --vip (VIPNAME) \
+          --ip (IP ADDRESS) \
+          --port (PORT) \
+          --backend_ip (BACKEND IP) \
+          --slave_backend_ip \ #(BACKEND IP ON THE SLAVE IN AZURE)
+          --backend_port (BACKEND PORT) \
+          --sslcert (SSLCERTNAME) \
+          --sslmode (high|fips|compatable|custom) \
+          --associated_to (Layer7 VIP to associate to, likely the same as --proxy_bind) \
+          #  --haproxy_ssl_link #(This is a combination of VIP_Name^VIP^PORT or custom) DEPRECIATED \
+          --ciphers \ # This and below syntax are optional. 
+          --disablesslv2 (on:off) \
+          --disablesslv3 (on:off) \
+          --disabletlsv1 (on:off) \
+          --stunneldnsdelay (on:off) \
+          --stunnelproxy (on:off) \
+          --servercipherorder (on:off) \
+          --emptyfragments  (on:off) \
+          --stunnelrenegotiation (on:off) \
+          --stunneltimetoclose 0 \
+          --proxy_bind L7VIPLabel\
+          --slave_ip \     (SLAVE IP IN AZURE)
+          --slave_source \ (SLAVE IP IN AZURE)
+          --disabletlsv1_1 (on:off)\
+          --disabletlsv1_2 (on:off)\
+          --disabletlsv1_3 (on:off) \
+          --sslcert server  : "server" # is the inbuilt default SSL Certificate 
+
+Delete Termintaion:     
+    lbcli --action termination --type stunnel --function delete --vip (VIPNAME)
+
+  
+SSL SNI Features
+
+ADD SNI Rules:          
+    lbcli --action termination --type stunnel --function edit --vip (VIP) --sni add \
+          --sni_name (SNINAME) \
+          --sni_rule (example.com) \
+          --sni_cert (SSLCERTNAME) \
+          --sni_backend_proxyprotocol (on:off) \
+          --sni_backend_service (L7VPIName) \ if you define sni_backend_ip and sni_slave_backend_ip in you must say sni_backend_service is custom
+          --sni_backend_ip (SNI_BACKEND_IP) \
+          --sni_slave_backend_ip (SLAVE_SNI_BACKEND_IP) \
+          --sni_backend_port (BACKEND_PORT)
+
+
+EDIT SNI Rules:        
+    lbcli --action termination --type stunnel --function edit --vip (VIP) --sni edit \
+          --sni_name (Existing SNINAME) \
+          --sni_rule (example.com) \
+          --sni_cert (SSLCERTNAME) \
+          --sni_backend_proxyprotocol (on:off) \
+          --sni_backend_service (L7VPIName) \
+          --sni_slave_backend_ip (SLAVE_SNI_BACKEND_IP) \
+          # or use below to replace sni_backend_service name and define ip and port
+          --sni_backend_ip (SNI_BACKEND_IP) --sni_backend_port (BACKEND_PORT)
+
+
+DELETE SNI Rules:       
+    lbcli --action termination --type stunnel --function edit --vip (VIP) --sni delete \
+          --sni_name (SNINAME) \
+          --sni_rule (example.com)
+
+Layer7 ACL Features
+
+LIST ACL Rules:         
+    lbcli --action acl --function list --vip (VIPNAME)
+
+ADD ACL Rules:          
+    lbcli --action acl --function add --vip (L7VIPNAME) \
+          --pathtype (path_beg|path_end|hdr_host|hdr_beg|query|src_blk) \                           
+          --path (URI PATH) \
+          --redirecttype (url_loc|url_pre|backend|use_server) \
+          --location (URL|BACKEND) \
+          --bool (equal|notequal)
+
+DELETE ACL Rules:       
+    lbcli --action acl --function delete --vip (L7VIPNAME) \
+          --pathtype (path_beg|path_end|hdr_host|hdr_beg|query|src_blk) \
+          --path (URI PATH) \
+          --redirecttype (url_loc|url_pre|backend|use_server) \
+          --location (URL|BACKEND) \
+          --bool (equal|notequal)
+
+Layer7 Header Features
+
+Add Header Rules        
+    lbcli --action headers --function add --vip (VIP Name) \
+          --header_type (http-request|http-response) \
+          --header_option (add|set|del|replace) \
+          --header_name (X-Custom-Header) \
+          --header_value (X-Custom-Value)
+
+Delete Header Rules     
+    lbcli --action headers --function delete --vip (VIP Name) \
+          --header_option (add|set|del|replace) \                           
+          --header_name (X-Custom-Header)
+
+List Header Rules       
+    lbcli --action headers --function list --vip (VIP Name)
+
+
+Firewall Lockdown script:   
+    lbcli --action lockdown --enabled on --network 0.0.0.0/0
+    
+You turn the lockdown features 'on' and 'off' and the network is your admin 
+subnet but if you do not wish to lockdown the management network then use 
+ip/cidr 0.0.0.0/0 
+
+List options
+
+List floating IP's      
+    lbcli --action list --function floatingip
+
+List XML as JSON        
+    lbcli --action list --function dumpconfig
+
+List advanced settings  
+    lbcli --action list --function advanced --layer 4:7
+
+List VIP for Layer4/7   
+    lbcli --action list --function virtual --layer 4:7 \
+          --vip vipname --rip ripname
+
+HA options
+
+Create HA               
+    lbcli --action ha_create --local_ip (this ip) \
+          --peer_ip ip.to.be.slave --peer_password loadbalancer
+
+To create a HA Pair, ensure both appliances are Master and the peer node 
+has no configuration, no VIP's no Floating IP's and no SSL Terminations    
+otherwise it will fail. Once you have created a HA Pair the command will 
+fail if run again as the peer role will be incorrect...
+
+Local Setup of Hostname, DNS, Networking, gateways and routes. 
+Use get and set to define the as below.
+
+Get and Set Host and Domainname 
+    lbcli --action hostname --function get
+    
+    lbcli --action hostname --function set \
+          --hostname (hostname) --domain (domain_name)
+
+Get and Set DNS Servers         
+    lbcli --action dns --function get    
+    
+    lbcli --action dns --function set \
+          --dns0 1.1.1.1 --dns1 8.8.4.4 --dns2 172.31.31.10
+
+To clear a DNS Server specify which is to be cleared with --dnsX ""
+note if dns0 and 1 are empty dns2 will show as dns0 in the WUI and
+general configuration
+
+Get and Set Interface MTU
+    lbcli --action mtu --function get 
+    
+    lbcli --action mtu --function set --interface eth0 --mtu 1500 
+
+When changing the MTU, ensure the upstream device has a matching or larger MTU.
+
+Get and Set default gateways    
+    lbcli --action route --function default --type get
+    
+    lbcli --action route --function default --type set \
+          --gateway (192.168.100.1 or 2001:470:68a4::1) \
+          --interface (if not set 'Auto' is used)
+    
+Get and set static routes       
+    lbcli --action route --function static --type get    
+    
+    lbcli --action route --function static --type add \
+          --network (192.168.100.100/18 or 2001:470:68a4::/48) \
+          --gateway (Gateway address to get to the network) ***
+
+    lbcli --action route --function static --type del \
+          --network (192.168.100.100/18 or 2001:470:68a4::/48) \
+          --gateway (192.168.100.1 or 2001:470:68a4::1) ***
+
+    lbcli --action route --function routes --type flush 
+
+Flushing routes will remove all static routes.
+
+Add and remove IP Addresses      
+    lbcli --action address --function get|add|del|*flush* \
+          --interface (Interface) \
+          --address (192.168.100.100/18 or 2001:470:68a4::10/48) \
+          --cidr (0-32 ipv4) or (64-112 ipv6)
+
+    get = Get addresses
+    add = Set a new address
+    del = Deletes the address specified
+    flush = flush an interface of all IP Addresses  
+
+Note that if --address is a simple IP without /CIDR then you 
+need to define the --cidr. IE --cidr 24 for 255.255.255.0 netmask
+
+If you need assistance with netmask to cidr conversions 
+please use the command below
+    
+    lbcli --help cidr
+
+Policy based VIP Routing
+     lbcli --action pbr --function get:set:delete --ip (VIP IP address) --gateway 1.2.3.4
+
+     --ip and --gateway are only required for --function set and delete 
+     if you define them for get it will return that policy if both --ip and --gateway match
+     If no match an empty set or policies are returned. 
+
+     You can only use IPv4 Floating IP's for the --ip and use of IPv6 or any other address 
+     will fail. 
+
+This allows you to define an alterninate gateway for your VIP's and it used to resolve 
+Policy Based Routing issues. 
+
+
+
+GSLB: Added v8.5.0  
+
+    lbcli --action gslb --section (globalnames|members|pools|topologies) --function (add|edit|delete|list)
+
+    (globalnames)  --name <example> --hostname  <fully qualified domain name> --ttl <3600>
+
+    (members) --name --ip <dns IP to publish> --monitor_ip <internal ip to monitor> --weight <0-10> --add_member name --add_member name
+    // only valid members are accepted and not more then one members which is the same per pool entry. two pools can share members
+    // members may share the backend but this will get confusing so please and keep your members low, unless you need another
+    // healthcheck then redefine the same IP for a Name in an Endpoint but be aware health checks may take their toll on the network.
+    // keep health check responses minimal  
+
+    (pools)  --name <poolname> --monitor <http|tcp|forced|external> --monitor_interval <5> --monitor_timeout <5000> \
+             --monitor_retries <3> --monitor_use_ssl <yes:no> --monitor_status <up:down> --monitor_hostname <fully qualified domain name / SNI Hostname> \
+             --monitor_port <80> --monitor_expected_codes <200,201 important - no spaces>  --monitor_send_string </example.php?status=up> \
+             --lb_method <wrr|twrr|fogroup> --fallback <any|refuse> --max_addresses_returned <1> --add_globalname <each globalname> \
+             --add_globalname <another globalname> --delete_globalname <delete globalname>  \
+             --add_member <first members> --delete_member <delete members> 
+
+            --monitor http --monitor_use_ssl <yes:no or true:false> --monitor_hostname gslb.example.com \
+                           --monitor_url_path / --monitor_port 80 --monitor_expected_codes 200,201,301 (only 3 codes expected)
+
+            --monitor tcp --monitor_port 80 --monitor_send_string check --monitor_match_response ?
+
+            --monitor forced --monitor_status <up:down>
+
+            --monitor external --monitor_script script.sh --monitor_parameters arg --monitor_result
+
+            --monitor external_dynamic_weight --monitor_port ? --monitor_parameters ?? 
+
+             To remove globalname you should use --delete_globalname and to remove members use --delete_member
+            
+             You should only use the --delete_globalname or --delete_member when editing your pools
+
+
+    (topologies) --name <Your AZ, DC, GEOLocaton> --add_ips <IP/CIDR> --add_ips <IP/CIDR> --add_ips <IP/CIDR> \
+                 --add_ips <Add as many IP CIDR ranges as needed> --delete_ips <IP/CIDR to remove>
+
+	(reports)
+
+	lbcli --action gslb --section reports --function get --report get_ppdns_state | get_generic_state
+
+
+
+Configure LBAPI from LBCLI
+    lbcli --action api --function (enable:disable|get) \
+          --username (username) \
+          --password (password) \
+          --apikey (apikey)
+
+Configure Power Control from LBCLI
+    lbcli --action power --function (shutdown|restart)
+
+This allows you to shutdown or restart the loadbalancer.org appliance
+be aware that shutdown will make the appliance unresponsive and will 
+require a visit to a hardware appliance to turn it back on.
+   
+
+When enabling the API --username and --password should be defined 
+optionally set --apikey or a random 32 char key will be returned. 
+
+If you wish to show the API credentials then you need not specify 
+--username --password or --apikey
+
+All lbcli calls can have '--method api' appended to force return 
+output JSON, many regular calls also now return JSON
+
+For individual help and advice on each action please type
+
+lbcli --help (action lbcli help about) 
+
+*   Informational 
+**  Not tested or complete
+*** Warning`
+
+
+[0m
