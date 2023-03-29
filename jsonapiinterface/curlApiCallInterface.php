@@ -12,7 +12,7 @@ function curlApiCallv2 ( $apidata ) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);		
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
     curl_setopt($ch,CURLOPT_ENCODING , "");		
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('X_LB_APIKEY:'.base64_encode($apidata['apikey']),
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-LB-APIKEY:'.base64_encode($apidata['apikey']),
 'Accept-Encoding: gzip, deflate','Connection: Close'));	
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
     curl_setopt($ch, CURLOPT_USERPWD, $apidata['username'].":".$apidata['password']);
